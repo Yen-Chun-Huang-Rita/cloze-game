@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>英文克漏字遊戲</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #1e1e2e;
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      color: #cdd6f4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #181825;
+      border: 1px solid #313244;
+      border-radius: 20px;
+      padding: 40px 44px;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* ── Title ── */
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #cdd6f4;
+      text-align: center;
+    }
+    h1 span { color: #89b4fa; }
+
+    /* ── Score bar ── */
+    .score-bar {
+      display: flex;
+      gap: 28px;
+      background: #1e1e2e;
+      border-radius: 50px;
+      padding: 8px 24px;
+      font-size: 0.95rem;
+    }
+    .score-bar .item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .score-bar .val  { font-size: 1.4rem; font-weight: 700; color: #a6e3a1; }
+    .score-bar .lbl  { font-size: 0.75rem; color: #6c7086; letter-spacing: 1px; }
+
+    /* ── Meaning badge ── */
+    .meaning {
+      background: #2a2a3d;
+      border-left: 3px solid #f9e2af;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      color: #f9e2af;
+      width: 100%;
+      text-align: center;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Word display ── */
+    .word-display {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      justify-content: center;
+      flex-wrap: wrap;
+      min-height: 90px;
+    }
+
+    .letter-box {
+      width: 54px;
+      height: 68px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+    .letter-box.filled {
+      background: #313244;
+      color: #89dceb;
+      border: 2px solid #45475a;
+    }
+    .letter-box.blank {
+      background: #2a2a3d;
+      border: 2px dashed #89b4fa;
+      color: transparent;
+      position: relative;
+    }
+    .letter-box.blank::after {
+      content: '?';
+      color: #89b4fa;
+      font-size: 1.6rem;
+      animation: pulse 1.5s infinite;
+    }
+    .letter-box.correct {
+      background: #1e3a2f;
+      color: #a6e3a1;
+      border: 2px solid #a6e3a1;
+      animation: pop 0.35s ease;
+    }
+    .letter-box.wrong-flash {
+      background: #3a1e1e;
+      border: 2px solid #f38ba8;
+      animation: shake 0.35s ease;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+    }
+    @keyframes pop {
+      0% { transform: scale(0.85); } 60% { transform: scale(1.15); } 100% { transform: scale(1); }
+    }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* ── Position hint ── */
+    .pos-hint {
+      font-size: 0.82rem;
+      color: #6c7086;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Input row ── */
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .input-row label { font-size: 0.95rem; color: #a6adc8; }
+
+    #letter-input {
+      width: 64px;
+      height: 56px;
+      background: #313244;
+      border: 2px solid #45475a;
+      border-radius: 10px;
+      color: #cdd6f4;
+      font-family: 'Courier New', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #letter-input:focus { border-color: #89b4fa; }
+    #letter-input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 22px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+    button:active { transform: scale(0.96); }
+    button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    #submit-btn  { background: #89b4fa; color: #1e1e2e; }
+    #hint-btn    { background: #f38ba8; color: #1e1e2e; }
+    #next-btn    { background: #a6e3a1; color: #1e1e2e; }
+
+    #submit-btn:hover:not(:disabled)  { background: #74c7ec; }
+    #hint-btn:hover:not(:disabled)    { background: #eba0ac; }
+    #next-btn:hover:not(:disabled)    { background: #94e2d5; }
+
+    /* ── Result message ── */
+    .result {
+      min-height: 28px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: center;
+      transition: color 0.3s;
+    }
+    .result.ok     { color: #a6e3a1; }
+    .result.err    { color: #f38ba8; }
+    .result.info   { color: #f9e2af; }
+
+    /* ── Keyboard (A-Z) ── */
+    .keyboard { width: 100%; }
+    .keyboard-row {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .key {
+      width: 36px;
+      height: 36px;
+      border-radius: 7px;
+      background: #313244;
+      border: 1.5px solid #45475a;
+      color: #cdd6f4;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .key:hover { background: #45475a; }
+    .key.used-correct { background: #1e3a2f; color: #a6e3a1; border-color: #a6e3a1; cursor: default; }
+    .key.used-wrong   { background: #3a1e1e; color: #f38ba8; border-color: #f38ba8; cursor: default; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 20px;
+      font-size: 0.78rem;
+      color: #45475a;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h1>英文 <span>克漏字</span> 遊戲</h1>
+
+  <!-- Score -->
+  <div class="score-bar">
+    <div class="item"><span class="val" id="score-val">0</span><span class="lbl">分數</span></div>
+    <div class="item"><span class="val" id="correct-val">0</span><span class="lbl">答對</span></div>
+    <div class="item"><span class="val" id="attempts-val">0</span><span class="lbl">答題</span></div>
+  </div>
+
+  <!-- Meaning -->
+  <div class="meaning" id="meaning-box">載入中…</div>
+
+  <!-- Word display -->
+  <div class="word-display" id="word-display"></div>
+
+  <!-- Position hint -->
+  <div class="pos-hint" id="pos-hint"></div>
+
+  <!-- Input -->
+  <div class="input-row">
+    <label for="letter-input">缺少的字母：</label>
+    <input id="letter-input" type="text" maxlength="1" autocomplete="off" spellcheck="false" />
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button id="submit-btn">確認 ↵</button>
+    <button id="hint-btn">💡 提示（扣1分）</button>
+    <button id="next-btn" disabled>下一題 →</button>
+  </div>
+
+  <!-- Result -->
+  <div class="result" id="result-msg"></div>
+
+  <!-- On-screen keyboard -->
+  <div class="keyboard" id="keyboard"></div>
+</div>
+
+<footer>按 Enter 確認答案 · 點擊字母鍵盤也可輸入</footer>
+
+<script>
+// ── Word list ──────────────────────────────────────────
+const WORDS = [
+  ["apple",  "a red or green fruit"],
+  ["brave",  "showing courage"],
+  ["chair",  "a piece of furniture to sit on"],
+  ["dance",  "to move rhythmically to music"],
+  ["eagle",  "a large bird of prey"],
+  ["flame",  "burning fire light"],
+  ["grape",  "a small fruit that grows in clusters"],
+  ["heart",  "the organ that pumps blood"],
+  ["image",  "a picture or visual representation"],
+  ["juice",  "liquid extracted from fruit"],
+  ["knife",  "a cutting tool with a blade"],
+  ["light",  "electromagnetic radiation visible to the eye"],
+  ["music",  "organized sound for artistic expression"],
+  ["night",  "the period of darkness"],
+  ["ocean",  "a large body of salt water"],
+  ["piano",  "a musical instrument with keys"],
+  ["queen",  "a female monarch or ruler"],
+  ["river",  "a large natural stream of water"],
+  ["smile",  "a facial expression of happiness"],
+  ["tiger",  "a large striped wild cat"],
+  ["umbra",  "the darkest part of a shadow"],
+  ["voice",  "sound produced by vocal cords"],
+  ["water",  "a clear liquid essential for life"],
+  ["xenon",  "a noble gas element"],
+  ["yacht",  "a medium-sized sailing boat"],
+  ["zebra",  "a striped African animal"],
+  ["angel",  "a divine spiritual being"],
+  ["bread",  "a baked food made from flour"],
+  ["cloud",  "a mass of water vapor in the sky"],
+  ["dream",  "images experienced during sleep"],
+  ["earth",  "the planet we live on"],
+  ["frost",  "ice crystals formed on surfaces"],
+  ["globe",  "a spherical model of the earth"],
+  ["honey",  "a sweet substance made by bees"],
+  ["ivory",  "a hard white material from tusks"],
+  ["jewel",  "a precious stone"],
+  ["kings",  "plural of king, male monarchs"],
+  ["lemon",  "a yellow citrus fruit"],
+  ["maple",  "a tree known for its syrup"],
+  ["noble",  "having high moral qualities"],
+  ["olive",  "a small oval fruit used for oil"],
+  ["pearl",  "a gem formed inside oysters"],
+  ["quart",  "a unit of liquid measurement"],
+  ["robin",  "a small red-breasted bird"],
+  ["stone",  "a hard mineral material"],
+  ["tulip",  "a spring-blooming flower"],
+  ["unity",  "the state of being united"],
+  ["vapor",  "gas form of a liquid substance"],
+  ["wheat",  "a grain used to make bread"],
+  ["youth",  "the period of being young"],
+];
+
+// ── Keyboard layout ────────────────────────────────────
+const KB_ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+
+// ── State ──────────────────────────────────────────────
+let currentWord   = "";
+let hiddenIndex   = 0;
+let hintUsed      = false;
+let answered      = false;
+let score         = 0;
+let correctCount  = 0;
+let attempts      = 0;
+
+// ── DOM refs ───────────────────────────────────────────
+const wordDisplay   = document.getElementById("word-display");
+const meaningBox    = document.getElementById("meaning-box");
+const posHint       = document.getElementById("pos-hint");
+const letterInput   = document.getElementById("letter-input");
+const submitBtn     = document.getElementById("submit-btn");
+const hintBtn       = document.getElementById("hint-btn");
+const nextBtn       = document.getElementById("next-btn");
+const resultMsg     = document.getElementById("result-msg");
+const scoreVal      = document.getElementById("score-val");
+const correctVal    = document.getElementById("correct-val");
+const attemptsVal   = document.getElementById("attempts-val");
+const keyboard      = document.getElementById("keyboard");
+
+// ── Build on-screen keyboard ───────────────────────────
+function buildKeyboard() {
+  keyboard.innerHTML = "";
+  KB_ROWS.forEach(row => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "keyboard-row";
+    [...row].forEach(ch => {
+      const key = document.createElement("div");
+      key.className = "key";
+      key.textContent = ch;
+      key.dataset.letter = ch;
+      key.addEventListener("click", () => {
+        if (answered) return;
+        letterInput.value = ch;
+        letterInput.focus();
+      });
+      rowDiv.appendChild(key);
+    });
+    keyboard.appendChild(rowDiv);
+  });
+}
+
+function resetKeyboard() {
+  document.querySelectorAll(".key").forEach(k => {
+    k.className = "key";
+  });
+}
+
+function markKey(letter, correct) {
+  const key = document.querySelector(`.key[data-letter="${letter.toUpperCase()}"]`);
+  if (key) key.classList.add(correct ? "used-correct" : "used-wrong");
+}
+
+// ── Render word boxes ──────────────────────────────────
+function renderWord(revealAnswer = false, wrongFlash = false) {
+  wordDisplay.innerHTML = "";
+  [...currentWord].forEach((ch, i) => {
+    const box = document.createElement("div");
+    box.className = "letter-box";
+    box.id = `box-${i}`;
+
+    if (i === hiddenIndex) {
+      if (revealAnswer) {
+        box.classList.add("correct");
+        box.textContent = ch.toUpperCase();
+      } else if (wrongFlash) {
+        box.classList.add("blank", "wrong-flash");
+      } else {
+        box.classList.add("blank");
+      }
+    } else {
+      box.classList.add("filled");
+      box.textContent = ch.toUpperCase();
+    }
+    wordDisplay.appendChild(box);
+  });
+}
+
+// ── Load new question ──────────────────────────────────
+function loadNewWord() {
+  const [word, meaning] = WORDS[Math.floor(Math.random() * WORDS.length)];
+  currentWord  = word;
+  hiddenIndex  = Math.floor(Math.random() * (word.length - 2)) + 1; // skip first & last
+  hintUsed     = false;
+  answered     = false;
+
+  meaningBox.textContent = `💡 ${meaning}`;
+  posHint.textContent    = `第 ${hiddenIndex + 1} 個字母（共 ${currentWord.length} 個字母）`;
+
+  renderWord();
+  resetKeyboard();
+
+  letterInput.value    = "";
+  letterInput.disabled = false;
+  submitBtn.disabled   = false;
+  hintBtn.disabled     = false;
+  nextBtn.disabled     = true;
+
+  setResult("", "");
+  letterInput.focus();
+}
+
+// ── Result helper ──────────────────────────────────────
+function setResult(text, type) {
+  resultMsg.textContent = text;
+  resultMsg.className   = "result" + (type ? " " + type : "");
+}
+
+// ── Update scoreboard ──────────────────────────────────
+function updateScore() {
+  scoreVal.textContent    = score;
+  correctVal.textContent  = correctCount;
+  attemptsVal.textContent = attempts;
+}
+
+// ── Show hint ──────────────────────────────────────────
+function showHint() {
+  if (hintUsed || answered) return;
+  hintUsed = true;
+  score = Math.max(0, score - 1);
+  updateScore();
+  const correct = currentWord[hiddenIndex].toUpperCase();
+  setResult(`缺少的字母是「 ${correct} 」（已扣 1 分）`, "info");
+  hintBtn.disabled = true;
+}
+
+// ── Check answer ───────────────────────────────────────
+function checkAnswer() {
+  if (answered) return;
+
+  const guess = letterInput.value.trim().toLowerCase();
+  if (!guess) { setResult("請輸入一個字母！", "err"); return; }
+  if (!/^[a-z]$/.test(guess)) { setResult("請輸入英文字母！", "err"); return; }
+
+  attempts++;
+  updateScore();
+
+  const correct = currentWord[hiddenIndex];
+
+  if (guess === correct) {
+    answered = true;
+    if (!hintUsed) { score++; correctCount++; }
+    else           { correctCount++; }
+    updateScore();
+
+    renderWord(true, false);
+    markKey(guess, true);
+
+    const bonus = hintUsed ? "（使用提示，不加分）" : "＋1 分！";
+    setResult(`✅ 答對了！完整單字：${currentWord.toUpperCase()}　${bonus}`, "ok");
+
+    letterInput.disabled = true;
+    submitBtn.disabled   = true;
+    hintBtn.disabled     = true;
+    nextBtn.disabled     = false;
+    nextBtn.focus();
+  } else {
+    markKey(guess, false);
+    renderWord(false, true);
+    // re-render without flash after animation
+    setTimeout(() => { if (!answered) renderWord(); }, 380);
+    setResult(`❌ 「${guess.toUpperCase()}」不對，再想想看…`, "err");
+    letterInput.value = "";
+    letterInput.focus();
+  }
+}
+
+// ── Event listeners ────────────────────────────────────
+submitBtn.addEventListener("click", checkAnswer);
+hintBtn.addEventListener("click", showHint);
+nextBtn.addEventListener("click", loadNewWord);
+
+letterInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") checkAnswer();
+});
+
+// Only allow single letter
+letterInput.addEventListener("input", () => {
+  letterInput.value = letterInput.value.slice(-1).replace(/[^a-zA-Z]/g, "");
+});
+
+// ── Init ───────────────────────────────────────────────
+buildKeyboard();
+loadNewWord();
+</script>
+</body>
+</html>
