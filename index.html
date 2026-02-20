@@ -5,1321 +5,801 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>英文克漏字遊戲</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  body {
-    background: #1e1e2e;
-    color: #cdd6f4;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
+body {
+  background: #fff8f0;
+  color: #3d2c1e;
+  font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px 16px 60px;
+  position: relative;
+  overflow-x: hidden;
+}
 
-  .card {
-    background: #181825;
-    border: 1.5px solid #313244;
-    border-radius: 18px;
-    padding: 36px 32px 28px 32px;
-    width: 100%;
-    max-width: 600px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 18px;
-  }
+/* ── Decorative Flowers ── */
+.flowers-left, .flowers-right {
+  position: fixed;
+  top: 0; bottom: 0;
+  width: 160px;
+  pointer-events: none;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px 0;
+}
+.flowers-left { left: 0; }
+.flowers-right { right: 0; }
 
-  h1 {
-    font-size: 1.7rem;
-    color: #cba6f7;
-    letter-spacing: 2px;
-    text-align: center;
-    font-weight: 700;
-  }
+.flower { font-size: 2.4rem; animation: sway 4s ease-in-out infinite; }
+.flower:nth-child(2) { animation-delay: 0.8s; font-size: 2rem; }
+.flower:nth-child(3) { animation-delay: 1.6s; font-size: 2.8rem; }
+.flower:nth-child(4) { animation-delay: 2.4s; font-size: 1.8rem; }
+.flower:nth-child(5) { animation-delay: 3.2s; font-size: 2.2rem; }
 
-  .score-bar {
-    display: flex;
-    gap: 24px;
-    background: #313244;
-    border-radius: 10px;
-    padding: 10px 28px;
-    font-size: 1rem;
-    width: 100%;
-    justify-content: center;
-  }
+@keyframes sway {
+  0%,100% { transform: rotate(-6deg) translateY(0); }
+  50% { transform: rotate(6deg) translateY(-8px); }
+}
 
-  .score-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
+/* ── Header ── */
+.header {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.header h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #c0392b;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 0 #f5b7b1;
+}
+.header .subtitle {
+  font-size: 0.88rem;
+  color: #999;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
 
-  .score-label {
-    font-size: 0.72rem;
-    color: #a6adc8;
-    letter-spacing: 1px;
-  }
+/* ── Player Panel ── */
+.player-panel {
+  position: relative; z-index: 1;
+  background: #fff;
+  border: 2px solid #f5cba7;
+  border-radius: 16px;
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 18px rgba(192,57,43,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.player-panel .row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.player-panel label {
+  font-size: 0.92rem;
+  color: #7d6e63;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.player-panel input[type="text"] {
+  flex: 1;
+  min-width: 100px;
+  padding: 7px 12px;
+  border: 1.5px solid #f0a899;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #3d2c1e;
+  background: #fff8f5;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.player-panel input[type="text"]:focus { border-color: #c0392b; }
+.player-panel .remember-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #7d6e63;
+}
+.player-panel input[type="checkbox"] {
+  width: 16px; height: 16px; cursor: pointer;
+  accent-color: #c0392b;
+}
+.btn-save-name {
+  padding: 7px 16px;
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-save-name:hover { background: #a93226; }
+.player-greeting {
+  font-size: 0.95rem;
+  color: #c0392b;
+  font-weight: 700;
+  display: none;
+}
 
-  .score-value {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #cba6f7;
-  }
+/* ── Stats Row ── */
+.stats-row {
+  position: relative; z-index: 1;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.stat-card {
+  flex: 1;
+  min-width: 90px;
+  background: #fff;
+  border: 2px solid #f5cba7;
+  border-radius: 14px;
+  padding: 10px 8px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(192,57,43,0.07);
+}
+.stat-card .val {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #c0392b;
+  line-height: 1;
+}
+.stat-card .lbl {
+  font-size: 0.72rem;
+  color: #aaa;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
 
-  .meaning-box {
-    background: #313244;
-    border-radius: 10px;
-    padding: 12px 20px;
-    font-size: 1rem;
-    color: #89dceb;
-    width: 100%;
-    text-align: center;
-    letter-spacing: 0.5px;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* ── Main Card ── */
+.card {
+  position: relative; z-index: 1;
+  background: #fff;
+  border: 2px solid #f5cba7;
+  border-radius: 22px;
+  padding: 28px 28px 22px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 6px 32px rgba(192,57,43,0.10);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
 
-  .word-display {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    min-height: 72px;
-  }
+/* ── Meaning ── */
+.meaning-box {
+  background: #fff8f0;
+  border-left: 4px solid #e67e22;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 18px;
+  font-size: 1rem;
+  color: #7d4e1e;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-style: italic;
+}
 
-  .letter-box {
-    width: 52px;
-    height: 62px;
-    background: #313244;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #89dceb;
-    border: 2px solid #45475a;
-    text-transform: uppercase;
-    letter-spacing: 0;
-    transition: background 0.2s, border-color 0.2s;
-  }
+/* ── Word Display ── */
+.word-display {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 76px;
+}
 
-  .letter-box.blank {
-    border: 2.5px dashed #cba6f7;
-    background: #1e1e2e;
-    color: #cba6f7;
-    position: relative;
-    animation: pulse-blank 1.4s ease-in-out infinite;
-  }
+.letter-box {
+  width: 52px;
+  height: 64px;
+  background: #fef9f5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 900;
+  color: #3d2c1e;
+  border: 2px solid #e8cbb0;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s;
+  font-family: 'Courier New', monospace;
+}
 
-  .letter-box.blank .question-mark {
-    font-size: 2rem;
-    font-weight: 900;
-    color: #cba6f7;
-    animation: pulse-q 1.4s ease-in-out infinite;
-  }
+.letter-box.blank {
+  border: 2.5px dashed #e74c3c;
+  background: #fff0ee;
+  animation: pulse-blank 1.4s ease-in-out infinite;
+}
+.letter-box.blank .question-mark {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #e74c3c;
+  animation: pulse-q 1.4s ease-in-out infinite;
+}
 
-  @keyframes pulse-blank {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(203,166,247,0.18); border-color: #cba6f7; }
-    50% { box-shadow: 0 0 0 8px rgba(203,166,247,0.08); border-color: #f5c2e7; }
-  }
+@keyframes pulse-blank {
+  0%,100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.15); border-color: #e74c3c; }
+  50% { box-shadow: 0 0 0 7px rgba(231,76,60,0.06); border-color: #f1948a; }
+}
+@keyframes pulse-q {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.12); }
+}
 
-  @keyframes pulse-q {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-  }
+.letter-box.correct-anim {
+  animation: pop-green 0.45s ease forwards;
+  background: #eafaf1;
+  border-color: #2ecc71;
+  color: #1e8449;
+}
+@keyframes pop-green {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35); background: #a9dfbf; }
+  70% { transform: scale(0.92); }
+  100% { transform: scale(1); background: #eafaf1; }
+}
 
-  .letter-box.correct-anim {
-    animation: pop-green 0.45s ease forwards;
-    background: #264733;
-    border-color: #a6e3a1;
-    color: #a6e3a1;
-  }
+.word-display.shake-anim { animation: shake 0.38s ease; }
+@keyframes shake {
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-10px); }
+  30%  { transform: translateX(10px); }
+  45%  { transform: translateX(-8px); }
+  60%  { transform: translateX(8px); }
+  75%  { transform: translateX(-4px); }
+  90%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
+}
 
-  @keyframes pop-green {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.35); background: #1e6b45; }
-    70% { transform: scale(0.92); }
-    100% { transform: scale(1); background: #264733; }
-  }
+.wrong-flash { animation: flash-red 0.38s ease; }
+@keyframes flash-red {
+  0%   { border-color: #e8cbb0; background: #fef9f5; }
+  30%  { border-color: #e74c3c; background: #fdecea; }
+  100% { border-color: #e8cbb0; background: #fef9f5; }
+}
 
-  .word-display.shake-anim {
-    animation: shake 0.38s ease;
-  }
+/* ── Position Hint ── */
+.position-hint {
+  font-size: 0.84rem;
+  color: #b0a090;
+  letter-spacing: 1px;
+  text-align: center;
+}
 
-  @keyframes shake {
-    0% { transform: translateX(0); }
-    15% { transform: translateX(-10px); }
-    30% { transform: translateX(10px); }
-    45% { transform: translateX(-8px); }
-    60% { transform: translateX(8px); }
-    75% { transform: translateX(-4px); }
-    90% { transform: translateX(4px); }
-    100% { transform: translateX(0); }
-  }
+/* ── Input ── */
+.input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.input-row label {
+  font-size: 0.9rem;
+  color: #7d6e63;
+  font-weight: 600;
+}
+#letter-input {
+  width: 64px;
+  height: 52px;
+  background: #fff8f5;
+  border: 2px solid #e8cbb0;
+  border-radius: 12px;
+  color: #3d2c1e;
+  font-size: 1.7rem;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+  text-transform: uppercase;
+  transition: border-color 0.2s;
+  font-family: 'Courier New', monospace;
+}
+#letter-input:focus { border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,0.12); }
+#letter-input:disabled { opacity: 0.4; }
 
-  .wrong-flash {
-    animation: flash-red 0.38s ease;
-  }
+/* ── Buttons ── */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 11px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  letter-spacing: 0.5px;
+}
+.btn:active { transform: scale(0.96); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  @keyframes flash-red {
-    0% { border-color: #45475a; }
-    30% { border-color: #f38ba8; background: #3d1a24; }
-    100% { border-color: #45475a; background: #313244; }
-  }
+.btn-confirm { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
+.btn-confirm:hover:not(:disabled) { filter: brightness(1.1); }
 
-  .position-hint {
-    font-size: 0.85rem;
-    color: #a6adc8;
-    letter-spacing: 1px;
-    text-align: center;
-  }
+.btn-hint { background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; }
+.btn-hint:hover:not(:disabled) { filter: brightness(1.1); }
 
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-  }
+.btn-next { background: linear-gradient(135deg, #2ecc71, #27ae60); color: #fff; display: none; }
+.btn-next:hover:not(:disabled) { filter: brightness(1.1); }
 
-  #letter-input {
-    width: 64px;
-    height: 48px;
-    background: #313244;
-    border: 2px solid #45475a;
-    border-radius: 10px;
-    color: #cdd6f4;
-    font-size: 1.6rem;
-    font-weight: 700;
-    text-align: center;
-    outline: none;
-    text-transform: uppercase;
-    transition: border-color 0.2s;
-    letter-spacing: 2px;
-  }
+/* ── Result ── */
+.result-msg {
+  font-size: 1.05rem;
+  font-weight: 700;
+  min-height: 28px;
+  letter-spacing: 0.5px;
+  text-align: center;
+  transition: color 0.2s;
+  padding: 4px 0;
+}
+.result-msg.correct { color: #1e8449; }
+.result-msg.wrong { color: #c0392b; }
+.result-msg.hint { color: #d35400; }
 
-  #letter-input:focus {
-    border-color: #89b4fa;
-  }
+/* ── Encouragement Popup ── */
+.encourage-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.encourage-overlay.show { display: flex; }
+.encourage-box {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 48px;
+  max-width: 420px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 12px 60px rgba(0,0,0,0.2);
+  animation: bounce-in 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+}
+@keyframes bounce-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.encourage-emoji { font-size: 3.5rem; margin-bottom: 12px; }
+.encourage-msg {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #c0392b;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.encourage-sub { font-size: 0.92rem; color: #aaa; margin-bottom: 24px; }
+.btn-encourage-close {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.btn-encourage-close:hover { filter: brightness(1.1); }
 
-  .btn-row {
-    display: flex;
-    gap: 12px;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+/* ── Keyboard ── */
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+}
+.kb-row { display: flex; gap: 5px; justify-content: center; }
+.kb-key {
+  width: 36px; height: 36px;
+  background: #fef9f5;
+  border: 1.5px solid #e8cbb0;
+  border-radius: 7px;
+  color: #3d2c1e;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  user-select: none;
+}
+.kb-key:active { transform: scale(0.93); }
+.kb-key:hover:not(.kb-correct):not(.kb-wrong) { background: #fde8e4; border-color: #e74c3c; }
+.kb-key.kb-correct { background: #d5f5e3; border-color: #2ecc71; color: #1e8449; cursor: default; }
+.kb-key.kb-wrong { background: #fdecea; border-color: #e74c3c; color: #c0392b; cursor: default; }
 
-  .btn {
-    padding: 10px 22px;
-    border: none;
-    border-radius: 9px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: filter 0.15s, transform 0.1s;
-    letter-spacing: 1px;
-  }
+/* ── Progress Bar ── */
+.progress-bar-wrap {
+  width: 100%;
+  background: #f5e6d8;
+  border-radius: 50px;
+  height: 8px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #e74c3c, #f39c12);
+  border-radius: 50px;
+  transition: width 0.4s ease;
+}
 
-  .btn:active { transform: scale(0.96); }
-  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+/* ── Leaderboard ── */
+.leaderboard {
+  position: relative; z-index: 1;
+  background: #fff;
+  border: 2px solid #f5cba7;
+  border-radius: 16px;
+  padding: 16px 20px;
+  width: 100%;
+  max-width: 600px;
+  margin-top: 14px;
+  box-shadow: 0 3px 14px rgba(192,57,43,0.07);
+}
+.leaderboard h3 {
+  font-size: 1rem;
+  color: #c0392b;
+  margin-bottom: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+  transition: background 0.15s;
+}
+.lb-row.me { background: #fff3cd; font-weight: 700; }
+.lb-row:not(.me):hover { background: #fef9f5; }
+.lb-rank { width: 28px; font-weight: 800; color: #c0392b; text-align: center; }
+.lb-name { flex: 1; color: #3d2c1e; }
+.lb-score { font-weight: 800; color: #e67e22; }
 
-  .btn-confirm { background: #89b4fa; color: #1e1e2e; }
-  .btn-confirm:hover:not(:disabled) { filter: brightness(1.12); }
-
-  .btn-hint { background: #f38ba8; color: #1e1e2e; }
-  .btn-hint:hover:not(:disabled) { filter: brightness(1.1); }
-
-  .btn-next { background: #a6e3a1; color: #1e1e2e; display: none; }
-  .btn-next:hover:not(:disabled) { filter: brightness(1.1); }
-
-  .result-msg {
-    font-size: 1.05rem;
-    font-weight: 700;
-    min-height: 28px;
-    letter-spacing: 1px;
-    text-align: center;
-    transition: color 0.2s;
-  }
-
-  .result-msg.correct { color: #a6e3a1; }
-  .result-msg.wrong { color: #f38ba8; }
-  .result-msg.hint { color: #f9e2af; }
-
-  /* Keyboard */
-  .keyboard {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    align-items: center;
-    width: 100%;
-    margin-top: 4px;
-  }
-
-  .kb-row {
-    display: flex;
-    gap: 5px;
-    justify-content: center;
-  }
-
-  .kb-key {
-    width: 38px;
-    height: 38px;
-    background: #313244;
-    border: 1.5px solid #45475a;
-    border-radius: 7px;
-    color: #cdd6f4;
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: background 0.18s, border-color 0.18s, color 0.18s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-  }
-
-  .kb-key:active { transform: scale(0.93); }
-  .kb-key:hover:not(.kb-correct):not(.kb-wrong) { background: #45475a; }
-
-  .kb-key.kb-correct {
-    background: #264733;
-    border-color: #a6e3a1;
-    color: #a6e3a1;
-    cursor: default;
-  }
-
-  .kb-key.kb-wrong {
-    background: #3d1a24;
-    border-color: #f38ba8;
-    color: #f38ba8;
-    cursor: default;
-  }
-
-  footer {
-    margin-top: 18px;
-    font-size: 0.82rem;
-    color: #6c7086;
-    letter-spacing: 1px;
-    text-align: center;
-  }
+footer {
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: #ccc;
+  letter-spacing: 1px;
+  text-align: center;
+  position: relative; z-index: 1;
+}
 </style>
 </head>
 <body>
 
-<div class="card">
-  <h1>英文克漏字遊戲</h1>
+<!-- Decorative Flowers Left -->
+<div class="flowers-left">
+  <div class="flower">🌸</div>
+  <div class="flower">🌺</div>
+  <div class="flower">🌼</div>
+  <div class="flower">🌷</div>
+  <div class="flower">🌻</div>
+</div>
 
-  <div class="score-bar">
-    <div class="score-item">
-      <span class="score-label">分數</span>
-      <span class="score-value" id="score-val">0</span>
+<!-- Decorative Flowers Right -->
+<div class="flowers-right">
+  <div class="flower">🌹</div>
+  <div class="flower">🌸</div>
+  <div class="flower">🌺</div>
+  <div class="flower">🌼</div>
+  <div class="flower">🌷</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>🌸 英文克漏字遊戲 🌸</h1>
+  <div class="subtitle">English Cloze Game · 猜出缺少的字母！</div>
+</div>
+
+<!-- Player Panel -->
+<div class="player-panel">
+  <div class="row" id="name-input-row">
+    <label for="player-name">👤 您的名字：</label>
+    <input type="text" id="player-name" placeholder="請輸入名字…" maxlength="20" autocomplete="off">
+    <button class="btn-save-name" onclick="saveName()">開始遊戲</button>
+  </div>
+  <div class="row">
+    <div class="remember-row">
+      <input type="checkbox" id="remember-me">
+      <label for="remember-me">記住我的名字與分數</label>
     </div>
-    <div class="score-item">
-      <span class="score-label">答對</span>
-      <span class="score-value" id="correct-val">0</span>
+  </div>
+  <div class="player-greeting" id="player-greeting"></div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="val" id="score-val">0</div>
+    <div class="lbl">分數</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" id="correct-val">0</div>
+    <div class="lbl">答對</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" id="total-val">0</div>
+    <div class="lbl">答題</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" id="players-val">–</div>
+    <div class="lbl">遊玩人數</div>
+  </div>
+  <div class="stat-card">
+    <div class="val" id="rank-val">–</div>
+    <div class="lbl">我的排名</div>
+  </div>
+</div>
+
+<!-- Main Card -->
+<div class="card">
+  <!-- Progress to next encouragement -->
+  <div style="width:100%">
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:#bbb;margin-bottom:5px">
+      <span>距下次鼓勵還差 <span id="progress-label">10</span> 題</span>
+      <span id="correct-count-label">已答對 0 題</span>
     </div>
-    <div class="score-item">
-      <span class="score-label">答題</span>
-      <span class="score-value" id="total-val">0</span>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
     </div>
   </div>
 
-  <div class="meaning-box" id="meaning-box">讀取中...</div>
-
+  <div class="meaning-box" id="meaning-box">準備開始…</div>
   <div class="word-display" id="word-display"></div>
-
   <div class="position-hint" id="position-hint"></div>
 
   <div class="input-row">
+    <label for="letter-input">缺少的字母：</label>
     <input type="text" id="letter-input" maxlength="1" placeholder="?" autocomplete="off" spellcheck="false">
   </div>
 
   <div class="btn-row">
-    <button class="btn btn-confirm" id="btn-confirm" onclick="submitAnswer()">確認</button>
-    <button class="btn btn-hint" id="btn-hint" onclick="useHint()">提示</button>
-    <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">下一題</button>
+    <button class="btn btn-confirm" id="btn-confirm" onclick="submitAnswer()">✔ 確認</button>
+    <button class="btn btn-hint" id="btn-hint" onclick="useHint()">💡 提示（扣1分）</button>
+    <button class="btn btn-next" id="btn-next" onclick="nextQuestion()">下一題 →</button>
   </div>
 
   <div class="result-msg" id="result-msg"></div>
-
   <div class="keyboard" id="keyboard"></div>
+</div>
+
+<!-- Leaderboard -->
+<div class="leaderboard" id="leaderboard">
+  <h3>🏆 排行榜（本裝置）</h3>
+  <div id="lb-list">載入中…</div>
 </div>
 
 <footer>按 Enter 確認答案 · 點擊字母鍵盤也可輸入</footer>
 
+<!-- Encouragement Popup -->
+<div class="encourage-overlay" id="encourage-overlay">
+  <div class="encourage-box">
+    <div class="encourage-emoji" id="enc-emoji">🎉</div>
+    <div class="encourage-msg" id="enc-msg"></div>
+    <div class="encourage-sub" id="enc-sub"></div>
+    <button class="btn-encourage-close" onclick="closeEncouragement()">繼續加油！</button>
+  </div>
+</div>
+
 <script>
+// ── Word List ──────────────────────────────────────────────────────────────
 const WORDS = [
-  ["time","a measured period or moment"],
-  ["year","a period of 12 months"],
-  ["hand","the part of the arm beyond the wrist"],
-  ["part","a piece or section of something"],
-  ["home","the place where one lives"],
-  ["face","the front of the head"],
-  ["name","a word used to identify a person or thing"],
-  ["life","the state of being alive"],
-  ["line","a long thin mark or boundary"],
-  ["back","the rear side of something"],
-  ["side","a surface or edge of something"],
-  ["food","substance eaten for nourishment"],
-  ["work","activity involving effort or labor"],
-  ["door","a movable barrier for an entrance"],
-  ["room","an enclosed space within a building"],
-  ["body","the physical structure of a person"],
-  ["form","the shape or structure of something"],
-  ["city","a large town or urban area"],
-  ["town","a settlement smaller than a city"],
-  ["land","solid ground or territory"],
-  ["park","an open green area for recreation"],
-  ["road","a paved path for vehicles"],
-  ["path","a track or route"],
-  ["tree","a tall woody plant with branches"],
-  ["bird","a feathered winged animal"],
-  ["fish","a cold-blooded aquatic animal"],
-  ["book","a written or printed work"],
-  ["word","a single unit of language"],
-  ["song","a musical composition with lyrics"],
-  ["game","an activity done for entertainment"],
-  ["fire","the rapid oxidation producing heat and light"],
-  ["rain","water falling from clouds"],
-  ["wind","moving air"],
-  ["snow","frozen water crystals falling from the sky"],
-  ["star","a luminous ball of gas in space"],
-  ["moon","the natural satellite of the earth"],
-  ["lake","a large inland body of water"],
-  ["hill","a raised area of land"],
-  ["rock","a solid mineral material"],
-  ["sand","fine grains of mineral material"],
-  ["gold","a precious yellow metal"],
-  ["iron","a common strong metal"],
-  ["milk","a white liquid produced by mammals"],
-  ["salt","a mineral used to season food"],
-  ["soap","a cleansing agent"],
-  ["rose","a flowering plant with thorns"],
-  ["leaf","a flat green part of a plant"],
-  ["seed","a plant embryo"],
-  ["root","the underground part of a plant"],
-  ["stem","the main stalk of a plant"],
-  ["wing","a limb used for flying"],
-  ["tail","the rear appendage of an animal"],
-  ["beak","the bill of a bird"],
-  ["claw","a sharp curved nail"],
-  ["nest","a structure where birds lay eggs"],
-  ["cage","an enclosure for animals"],
-  ["rope","a thick twisted cord"],
-  ["nail","a small metal spike"],
-  ["wire","a thin metal thread"],
-  ["pipe","a hollow tube"],
-  ["wall","a vertical structure"],
-  ["roof","the top covering of a building"],
-  ["step","a single stair or footfall"],
-  ["desk","a writing table"],
-  ["lamp","a light-giving device"],
-  ["bell","a hollow metal object that rings"],
-  ["ring","a circular band"],
-  ["ball","a round object used in sports"],
-  ["boat","a small watercraft"],
-  ["ship","a large watercraft"],
-  ["cart","a wheeled vehicle"],
-  ["bike","a two-wheeled vehicle"],
-  ["drum","a percussion instrument"],
-  ["horn","a wind instrument"],
-  ["harp","a stringed instrument"],
-  ["flute","a woodwind instrument"],
-  ["piano","a musical keyboard instrument"],
-  ["apple","a red or green fruit"],
-  ["grape","a small fruit in clusters"],
-  ["lemon","a yellow citrus fruit"],
-  ["mango","a tropical fruit"],
-  ["peach","a soft fuzzy fruit"],
-  ["plum","a small purple fruit"],
-  ["pear","a sweet juicy fruit"],
-  ["lime","a small green citrus fruit"],
-  ["corn","a yellow grain vegetable"],
-  ["bean","a seed pod vegetable"],
-  ["peas","small round green vegetables"],
-  ["mint","an aromatic herb"],
-  ["sage","a culinary herb"],
-  ["rice","a grain staple food"],
-  ["meat","animal flesh used as food"],
-  ["beef","meat from cattle"],
-  ["pork","meat from pigs"],
-  ["lamb","meat from young sheep"],
-  ["cake","a sweet baked dessert"],
-  ["bread","a baked food from flour"],
-  ["soup","a liquid food dish"],
-  ["stew","a slow-cooked dish"],
-  ["taco","a Mexican food item"],
-  ["chip","a thin crispy snack"],
-  ["blue","the color of the sky"],
-  ["pink","a light red color"],
-  ["gray","a neutral color between black and white"],
-  ["dark","having little light"],
-  ["soft","not hard or firm"],
-  ["hard","solid and firm"],
-  ["warm","moderately hot"],
-  ["cool","moderately cold"],
-  ["fast","moving quickly"],
-  ["slow","not moving quickly"],
-  ["tall","of great height"],
-  ["wide","of great width"],
-  ["deep","extending far down"],
-  ["thin","having little thickness"],
-  ["flat","having a level surface"],
-  ["round","having a circular shape"],
-  ["long","having great length"],
-  ["near","close in distance"],
-  ["safe","free from danger"],
-  ["wild","living in nature"],
-  ["free","not restricted"],
-  ["open","not closed"],
-  ["full","containing as much as possible"],
-  ["kind","having a friendly nature"],
-  ["bold","showing courage"],
-  ["calm","free from agitation"],
-  ["dear","regarded with affection"],
-  ["glad","feeling happy"],
-  ["huge","very large"],
-  ["idle","not working"],
-  ["keen","eager and enthusiastic"],
-  ["lazy","unwilling to work"],
-  ["mild","not extreme"],
-  ["neat","tidy and orderly"],
-  ["pale","light in color"],
-  ["pure","not mixed"],
-  ["rare","not common"],
-  ["rich","having great wealth"],
-  ["rude","not polite"],
-  ["rush","to move fast"],
-  ["tame","not wild"],
-  ["vain","having too much pride"],
-  ["vast","very large in area"],
-  ["walk","to move on foot"],
-  ["jump","to leap into the air"],
-  ["swim","to move through water"],
-  ["sing","to make musical sounds"],
-  ["play","to engage in fun activity"],
-  ["read","to look at and understand text"],
-  ["write","to form letters or words"],
-  ["draw","to make a picture"],
-  ["cook","to prepare food with heat"],
-  ["bake","to cook in an oven"],
-  ["wash","to clean with water"],
-  ["build","to construct something"],
-  ["grow","to increase in size"],
-  ["close","to shut"],
-  ["start","to begin"],
-  ["stop","to cease"],
-  ["push","to apply force away from oneself"],
-  ["pull","to draw toward oneself"],
-  ["lift","to raise upward"],
-  ["drop","to let fall"],
-  ["hold","to keep in one's hand"],
-  ["send","to cause to go"],
-  ["find","to discover"],
-  ["keep","to retain"],
-  ["give","to transfer to another"],
-  ["take","to receive"],
-  ["make","to create"],
-  ["help","to assist"],
-  ["hope","to wish for"],
-  ["love","a deep affection"],
-  ["fear","an unpleasant emotion from danger"],
-  ["hate","strong dislike"],
-  ["care","to feel concern"],
-  ["wait","to stay until something happens"],
-  ["call","to speak loudly or phone"],
-  ["talk","to speak"],
-  ["hear","to perceive sound"],
-  ["look","to direct eyes toward"],
-  ["feel","to experience a sensation"],
-  ["seem","to appear to be"],
-  ["know","to be aware of"],
-  ["think","to use one's mind"],
-  ["want","to desire"],
-  ["need","to require"],
-  ["like","to find pleasant"],
-  ["live","to be alive"],
-  ["move","to change position"],
-  ["turn","to rotate"],
-  ["fall","to drop down"],
-  ["stand","to be upright"],
-  ["bring","to carry here"],
-  ["show","to display"],
-  ["tell","to communicate information"],
-  ["meet","to come together"],
-  ["leave","to go away from"],
-  ["learn","to gain knowledge"],
-  ["teach","to give knowledge"],
-  ["study","to apply the mind to learning"],
-  ["smile","a happy facial expression"],
-  ["laugh","to express amusement"],
-  ["sleep","a state of rest"],
-  ["dream","images during sleep"],
-  ["speak","to talk"],
-  ["climb","to go up"],
-  ["dance","to move rhythmically"],
-  ["fight","to engage in combat"],
-  ["catch","to capture or seize"],
-  ["throw","to propel through the air"],
-  ["break","to separate into pieces"],
-  ["shake","to move back and forth"],
-  ["touch","to make contact"],
-  ["taste","to sense flavor"],
-  ["smell","to sense odor"],
-  ["watch","to observe"],
-  ["check","to examine"],
-  ["count","to enumerate"],
-  ["cover","to place over"],
-  ["enter","to go into"],
-  ["exist","to have being"],
-  ["enjoy","to take pleasure in"],
-  ["avoid","to keep away from"],
-  ["allow","to permit"],
-  ["offer","to present for acceptance"],
-  ["reach","to stretch out to"],
-  ["serve","to work for"],
-  ["share","to divide among others"],
-  ["spend","to use time or money"],
-  ["solve","to find an answer"],
-  ["store","to keep for future use"],
-  ["track","to follow the trail of"],
-  ["train","to teach skills"],
-  ["trust","to believe in"],
-  ["visit","to go to see"],
-  ["waste","to use carelessly"],
-  ["world","the earth and all life"],
-  ["house","a building for living in"],
-  ["water","a clear liquid essential for life"],
-  ["music","organized sound"],
-  ["night","the period of darkness"],
-  ["light","electromagnetic radiation"],
-  ["heart","the organ that pumps blood"],
-  ["earth","the planet we live on"],
-  ["place","a particular location"],
-  ["thing","an object"],
-  ["point","a specific location"],
-  ["group","a collection of things"],
-  ["state","a condition or territory"],
-  ["whole","complete and entire"],
-  ["level","a position on a scale"],
-  ["power","the ability to do something"],
-  ["money","a medium of exchange"],
-  ["story","an account of events"],
-  ["class","a group of students"],
-  ["paper","a thin material for writing"],
-  ["north","the direction toward the North Pole"],
-  ["south","the direction toward the South Pole"],
-  ["young","not old"],
-  ["large","of great size"],
-  ["small","of little size"],
-  ["human","relating to people"],
-  ["local","relating to a nearby area"],
-  ["early","before the expected time"],
-  ["never","not at any time"],
-  ["often","many times"],
-  ["again","one more time"],
-  ["maybe","perhaps"],
-  ["quite","to a considerable degree"],
-  ["every","each one"],
-  ["above","at a higher level"],
-  ["below","at a lower level"],
-  ["after","following in time"],
-  ["since","from a time in the past"],
-  ["about","concerning"],
-  ["horse","a large domesticated animal"],
-  ["camel","a desert animal with humps"],
-  ["tiger","a large striped wild cat"],
-  ["eagle","a large bird of prey"],
-  ["shark","a large predatory fish"],
-  ["whale","a very large sea mammal"],
-  ["snake","a legless reptile"],
-  ["frog","a small amphibian"],
-  ["crane","a large wading bird"],
-  ["panda","a black and white bear"],
-  ["koala","an Australian marsupial"],
-  ["zebra","a striped African animal"],
-  ["moose","a large deer-like animal"],
-  ["otter","a semi-aquatic mammal"],
-  ["river","a large natural stream"],
-  ["ocean","a large body of salt water"],
-  ["beach","sandy shore by the sea"],
-  ["cloud","a mass of water vapor"],
-  ["storm","a violent weather event"],
-  ["frost","ice crystals on surfaces"],
-  ["flame","burning fire light"],
-  ["smoke","gas from burning material"],
-  ["shade","darkness from blocked light"],
-  ["field","open land for farming"],
-  ["forest","a large area of trees"],
-  ["valley","low land between hills"],
-  ["bridge","a structure over water"],
-  ["tower","a tall narrow structure"],
-  ["castle","a large fortified building"],
-  ["church","a place of worship"],
-  ["school","a place for learning"],
-  ["hotel","a place to stay"],
-  ["market","a place to buy and sell"],
-  ["garden","a place to grow plants"],
-  ["prison","a place to hold criminals"],
-  ["island","land surrounded by water"],
-  ["planet","a large body orbiting a star"],
-  ["spring","the season after winter"],
-  ["summer","the warmest season"],
-  ["autumn","the season before winter"],
-  ["winter","the coldest season"],
-  ["morning","the early part of the day"],
-  ["evening","the late part of the day"],
-  ["minute","sixty seconds"],
-  ["second","one sixtieth of a minute"],
-  ["mother","a female parent"],
-  ["father","a male parent"],
-  ["sister","a female sibling"],
-  ["brother","a male sibling"],
-  ["friend","a person you like"],
-  ["doctor","a medical professional"],
-  ["nurse","a healthcare worker"],
-  ["artist","a person who creates art"],
-  ["farmer","a person who farms"],
-  ["hunter","a person who hunts"],
-  ["leader","a person who leads"],
-  ["player","a person who plays"],
-  ["singer","a person who sings"],
-  ["writer","a person who writes"],
-  ["dancer","a person who dances"],
-  ["winner","a person who wins"],
-  ["master","a person with great skill"],
-  ["helper","a person who helps"],
-  ["worker","a person who works"],
-  ["driver","a person who drives"],
-  ["baker","a person who bakes"],
-  ["buyer","a person who buys"],
-  ["seller","a person who sells"],
-  ["owner","a person who owns"],
-  ["trader","a person who trades"],
-  ["sailor","a person who sails"],
-  ["keeper","a person who keeps"],
-  ["runner","a person who runs"],
-  ["jumper","a person who jumps"],
-  ["caller","a person who calls"],
-  ["reader","a person who reads"],
-  ["faster","more quick"],
-  ["harder","more difficult"],
-  ["louder","more loud"],
-  ["longer","greater in length"],
-  ["higher","greater in height"],
-  ["deeper","greater in depth"],
-  ["wider","greater in width"],
-  ["closer","nearer in distance"],
-  ["older","greater in age"],
-  ["newer","more recent"],
-  ["smart","having good judgment"],
-  ["brave","showing courage"],
-  ["angry","feeling strong displeasure"],
-  ["happy","feeling pleasure"],
-  ["lucky","having good fortune"],
-  ["funny","causing amusement"],
-  ["crazy","mentally unstable"],
-  ["dizzy","feeling unsteady"],
-  ["messy","untidy and disorganized"],
-  ["nasty","unpleasant"],
-  ["noisy","making a lot of sound"],
-  ["shiny","reflecting light brightly"],
-  ["spicy","having a strong flavor"],
-  ["sunny","bright with sunlight"],
-  ["windy","with much wind"],
-  ["rainy","with much rain"],
-  ["foggy","filled with fog"],
-  ["muddy","covered with mud"],
-  ["dusty","covered with dust"],
-  ["rusty","covered with rust"],
-  ["bumpy","having many bumps"],
-  ["curly","having curls"],
-  ["wavy","having waves"],
-  ["fluffy","light and soft"],
-  ["cheek","the side of the face"],
-  ["elbow","the joint in the middle of the arm"],
-  ["ankle","the joint between foot and leg"],
-  ["thumb","the short thick finger"],
-  ["skull","the bony framework of the head"],
-  ["spine","the backbone"],
-  ["liver","a vital organ"],
-  ["kidney","an organ that filters blood"],
-  ["nerve","a fiber that transmits impulses"],
-  ["blood","the red fluid in the body"],
-  ["brain","the organ of thought"],
-  ["tooth","a hard structure in the mouth"],
-  ["tongue","the organ of taste"],
-  ["chest","the front of the torso"],
-  ["belly","the abdomen"],
-  ["crown","the top of the head"],
-  ["brow","the forehead"],
-  ["chin","the lower part of the face"],
-  ["palm","the inner surface of the hand"],
-  ["wrist","the joint between hand and arm"],
-  ["knee","the joint in the middle of the leg"],
-  ["blade","a flat cutting edge"],
-  ["arrow","a projectile shot from a bow"],
-  ["sword","a long bladed weapon"],
-  ["spear","a long pointed weapon"],
-  ["shield","a protective device"],
-  ["armor","protective covering"],
-  ["fence","a barrier around an area"],
-  ["hedge","a row of bushes as a barrier"],
-  ["ditch","a narrow channel dug in the ground"],
-  ["creek","a small stream"],
-  ["brook","a small stream"],
-  ["swamp","a wetland area"],
-  ["marsh","a wetland with grasses"],
-  ["plain","flat open land"],
-  ["slope","a surface at an angle"],
-  ["cliff","a steep rock face"],
-  ["cave","a hollow in the earth"],
-  ["mine","a place to extract minerals"],
-  ["port","a harbor for ships"],
-  ["dock","a platform at a harbor"],
-  ["canal","a man-made waterway"],
-  ["drain","a channel for water removal"],
-  ["pump","a device to move fluids"],
-  ["valve","a device to control flow"],
-  ["gauge","a measuring instrument"],
-  ["lever","a rigid bar for lifting"],
-  ["wheel","a circular rotating object"],
-  ["axle","a shaft on which wheels turn"],
-  ["chain","a series of linked rings"],
-  ["cable","a thick wire or rope"],
-  ["knot","a fastening made by tying"],
-  ["loop","a curved shape"],
-  ["hook","a curved device for catching"],
-  ["latch","a fastening device"],
-  ["hinge","a joint that allows rotation"],
-  ["screw","a threaded fastener"],
-  ["bolt","a metal pin with a thread"],
-  ["rivet","a metal fastener"],
-  ["clamp","a device for gripping"],
-  ["wrench","a tool for turning bolts"],
-  ["drill","a tool for making holes"],
-  ["brush","a tool with bristles"],
-  ["broom","a sweeping tool"],
-  ["cloth","woven fabric"],
-  ["linen","a fabric made from flax"],
-  ["wool","fiber from sheep"],
-  ["silk","a fine natural fiber"],
-  ["nylon","a synthetic fabric"],
-  ["denim","a sturdy cotton fabric"],
-  ["print","a mark made by pressing"],
-  ["stamp","to press a mark onto"],
-  ["brand","a mark identifying a product"],
-  ["label","a tag with information"],
-  ["badge","an identifying emblem"],
-  ["token","a small object representing value"],
-  ["medal","an award given for achievement"],
-  ["prize","a reward for winning"],
-  ["award","something given in recognition"],
-  ["grant","money given for a purpose"],
-  ["bonus","extra pay or reward"],
-  ["raise","an increase in pay"],
-  ["limit","a maximum or boundary"],
-  ["quota","a fixed share or amount"],
-  ["ratio","a relationship between quantities"],
-  ["scale","a range of values"],
-  ["range","the extent of variation"],
-  ["scope","the extent of coverage"],
-  ["depth","the distance downward"],
-  ["width","the measurement across"],
-  ["speed","the rate of movement"],
-  ["angle","the space between two lines"],
-  ["curve","a smoothly bending line"],
-  ["plane","a flat surface"],
-  ["solid","a firm three-dimensional object"],
-  ["shape","the outer form of an object"],
-  ["model","a representation of something"],
-  ["image","a picture or likeness"],
-  ["photo","a picture taken by a camera"],
-  ["frame","a border or structure"],
-  ["panel","a flat section of a surface"],
-  ["plate","a flat dish for food"],
-  ["bowl","a round deep dish"],
-  ["glass","a container for drinking"],
-  ["spoon","a utensil for eating liquids"],
-  ["knife","a cutting utensil"],
-  ["ladle","a large spoon for serving"],
-  ["tongs","a gripping utensil"],
-  ["whisk","a cooking utensil"],
-  ["grater","a tool for shredding food"],
-  ["sieve","a tool for straining"],
-  ["timer","a device that measures time"],
-  ["stove","a cooking appliance"],
-  ["flask","a container for liquids"],
-  ["vase","a decorative container for flowers"],
-  ["shelf","a flat board for storage"],
-  ["drawer","a sliding storage compartment"],
-  ["closet","a small storage room"],
-  ["cellar","an underground storage room"],
-  ["attic","a space just below the roof"],
-  ["porch","a covered entrance to a building"],
-  ["lobby","an entrance hall"],
-  ["hall","a corridor in a building"],
-  ["stair","a step in a staircase"],
-  ["ramp","a sloping surface"],
-  ["ledge","a narrow horizontal surface"],
-  ["sill","the bottom of a window frame"],
-  ["pane","a sheet of glass in a window"],
-  ["blind","a window covering"],
-  ["mural","a painting on a wall"],
-  ["sketch","a rough drawing"],
-  ["draft","a preliminary version"],
-  ["proof","evidence establishing a fact"],
-  ["claim","an assertion of something"],
-  ["blame","responsibility for a fault"],
-  ["shame","a painful feeling of guilt"],
-  ["pride","satisfaction in achievements"],
-  ["greed","excessive desire for wealth"],
-  ["envy","desire for others possessions"],
-  ["anger","a strong feeling of displeasure"],
-  ["grief","deep sorrow"],
-  ["worry","a state of anxiety"],
-  ["doubt","a feeling of uncertainty"],
-  ["faith","complete trust or confidence"],
-  ["peace","freedom from conflict"],
-  ["mercy","compassion toward others"],
-  ["grace","elegance and beauty of movement"],
-  ["charm","the power to attract"],
-  ["magic","mysterious power"],
-  ["spell","a form of words with magic"],
-  ["curse","a wish of harm on someone"],
-  ["spirit","the non-physical part of a person"],
-  ["ghost","the spirit of a dead person"],
-  ["angel","a divine spiritual being"],
-  ["demon","an evil spirit"],
-  ["myth","a traditional story"],
-  ["fable","a short story with a moral"],
-  ["tale","a narrative or story"],
-  ["poem","a literary composition in verse"],
-  ["verse","writing arranged in lines"],
-  ["rhyme","words with similar sounds"],
-  ["rhythm","a regular pattern of sound"],
-  ["theme","the main subject of a work"],
-  ["topic","a subject of discussion"],
-  ["issue","an important subject for debate"],
-  ["event","something that happens"],
-  ["scene","a place where something occurs"],
-  ["stage","a platform for performance"],
-  ["drama","a play or exciting event"],
-  ["comedy","a humorous work"],
-  ["horror","an intense feeling of fear"],
-  ["action","the process of doing something"],
-  ["effect","a result or outcome"],
-  ["cause","a reason for something"],
-  ["basis","the foundation of something"],
-  ["logic","systematic reasoning"],
-  ["fact","a thing known to be true"],
-  ["data","facts and statistics"],
-  ["input","data put into a system"],
-  ["signal","a gesture conveying information"],
-  ["noise","unwanted sound or data"],
-  ["error","a mistake"],
-  ["fault","a defect or mistake"],
-  ["flaw","an imperfection"],
-  ["crack","a line of breakage"],
-  ["dent","a small depression"],
-  ["mark","a visible trace"],
-  ["stain","a discoloration"],
-  ["spot","a small mark or area"],
-  ["patch","a piece used to repair"],
-  ["seam","a line where things are joined"],
-  ["edge","the border of something"],
-  ["border","a boundary between areas"],
-  ["bound","a boundary or limit"],
-  ["zone","an area with particular features"],
-  ["region","a large area of land"],
-  ["sector","a distinct part of something"],
-  ["domain","an area of knowledge"],
-  ["realm","a kingdom or field of activity"],
-  ["space","an area that is empty"],
-  ["base","the lowest part or foundation"],
-  // 200 additional words
-  ["acid","a corrosive chemical substance"],
-  ["acre","a unit of land area"],
-  ["aged","having lived for a long time"],
-  ["aide","an assistant or helper"],
-  ["airy","having fresh air or open space"],
-  ["akin","similar or related to"],
-  ["alga","a simple aquatic plant"],
-  ["ally","a partner or supporter"],
-  ["aloe","a succulent plant with healing gel"],
-  ["also","in addition or furthermore"],
-  ["alto","a low female singing voice"],
-  ["amen","a word said at the end of a prayer"],
-  ["amid","surrounded by or in the middle of"],
-  ["arch","a curved structure spanning an opening"],
-  ["area","a particular region or space"],
-  ["army","a large organized military force"],
-  ["ashy","covered in or resembling ash"],
-  ["atop","on the top of something"],
-  ["aunt","the sister of a parent"],
-  ["auto","a self-propelled vehicle"],
-  ["avid","having a keen interest in something"],
-  ["awed","filled with wonder and respect"],
-  ["ache","a dull continuous pain"],
-  ["acre","a unit of land equal to 4840 square yards"],
-  ["bald","having no hair on the head"],
-  ["balm","a soothing ointment or lotion"],
-  ["band","a flat strip or group of musicians"],
-  ["bang","a sudden loud noise"],
-  ["bank","a financial institution"],
-  ["barn","a large farm building"],
-  ["base","the bottom or foundation of something"],
-  ["bash","to hit hard or a party"],
-  ["bath","a washing of the body"],
-  ["beam","a ray of light or a structural timber"],
-  ["beat","to strike repeatedly"],
-  ["beef","meat from cattle"],
-  ["been","past participle of be"],
-  ["beer","an alcoholic drink made from grain"],
-  ["beet","a root vegetable with red flesh"],
-  ["best","of the highest quality"],
-  ["bite","to cut with teeth"],
-  ["blob","a small rounded mass"],
-  ["bloc","a group of countries or people allied"],
-  ["blow","to move air with force"],
-  ["blue","the color of a clear sky"],
-  ["boar","a male pig"],
-  ["bode","to be an omen of something"],
-  ["bone","a rigid tissue forming the skeleton"],
-  ["boom","a loud deep sound or rapid growth"],
-  ["boot","a sturdy covering for the foot"],
-  ["bore","to make a hole or to be tedious"],
-  ["born","having come into existence"],
-  ["boss","a person in charge"],
-  ["both","two considered together"],
-  ["brew","to make beer or coffee"],
-  ["bull","an adult male bovine animal"],
-  ["bump","a small raised area or collision"],
-  ["burn","to be on fire or cause injury by heat"],
-  ["burp","to expel gas from the stomach"],
-  ["busy","actively engaged in work"],
-  ["buzz","a low humming sound"],
-  ["cape","a sleeveless cloak or piece of land"],
-  ["card","a flat piece of stiff paper"],
-  ["carp","a freshwater fish or to complain"],
-  ["cash","money in coins or notes"],
-  ["cast","to throw or assign roles"],
-  ["ceil","to furnish with a ceiling"],
-  ["cell","a small room or basic unit of life"],
-  ["cent","a monetary unit"],
-  ["chad","small piece of paper punched out"],
-  ["chap","a man or to crack the skin"],
-  ["char","to scorch or burn"],
-  ["chat","to talk in a friendly way"],
-  ["chew","to crush food with teeth"],
-  ["chop","to cut with a sharp blow"],
-  ["cite","to quote as evidence"],
-  ["clad","wearing certain clothes"],
-  ["clap","to strike hands together"],
-  ["clay","a stiff earthy material"],
-  ["clip","to cut or fasten"],
-  ["clod","a lump of earth"],
-  ["clog","to block or a wooden shoe"],
-  ["clot","a thickened mass of liquid"],
-  ["clue","a piece of evidence"],
-  ["coal","a black solid fuel"],
-  ["coat","an outer garment"],
-  ["coil","a series of loops"],
-  ["coin","a metal disc used as money"],
-  ["cola","a sweet carbonated drink"],
-  ["cold","low in temperature"],
-  ["colt","a young male horse"],
-  ["comb","a toothed device for hair"],
-  ["cone","a three-dimensional shape"],
-  ["cope","to deal with difficulties"],
-  ["cord","a length of string"],
-  ["core","the central part of something"],
-  ["cork","a buoyant material from bark"],
-  ["cost","the price of something"],
-  ["cozy","comfortable and warm"],
-  ["crew","a group working together"],
-  ["crop","a cultivated plant or to cut short"],
-  ["crow","a black bird or to boast"],
-  ["cube","a three-dimensional square shape"],
-  ["curb","a stone edge of a path"],
-  ["cute","attractive in a pretty way"],
-  ["dame","an older woman"],
-  ["damp","slightly wet"],
-  ["dare","to have the courage to do something"],
-  ["dart","a small pointed missile"],
-  ["dash","to move quickly or a small mark"],
-  ["dawn","the first light of day"],
-  ["daze","a state of confusion"],
-  ["dead","no longer alive"],
-  ["deaf","unable to hear"],
-  ["deal","an agreement or to distribute"],
-  ["dean","a head of a faculty"],
-  ["debt","money owed to another"],
-  ["deck","a flat surface or a set of cards"],
-  ["deed","an action or a legal document"],
-  ["deem","to regard or consider"],
-  ["deny","to refuse or contradict"],
-  ["desk","a writing table"],
-  ["dew","water droplets from condensation"],
-  ["dice","small cubes used in games"],
-  ["diet","food habitually eaten"],
-  ["dime","a ten-cent coin"],
-  ["dine","to eat dinner"],
-  ["dire","extremely serious"],
-  ["dirt","loose soil or filth"],
-  ["disc","a flat circular object"],
-  ["dish","a container for food"],
-  ["disk","a flat circular storage device"],
-  ["dive","to plunge into water headfirst"],
-  ["dome","a rounded vault forming a roof"],
-  ["done","having finished something"],
-  ["dose","a measured amount of medicine"],
-  ["dote","to be excessively fond of"],
-  ["dove","a white bird symbolizing peace"],
-  ["down","in a lower position"],
-  ["doze","to sleep lightly"],
-  ["drab","dull or lacking brightness"],
-  ["drag","to pull with effort"],
-  ["drip","to fall in small drops"],
-  ["drop","a small quantity of liquid"],
-  ["drug","a medicine or illegal substance"],
-  ["dryer","a machine that removes moisture"],
-  ["dude","an informal term for a person"],
-  ["dull","lacking brightness or interest"],
-  ["dumb","unable to speak or stupid"],
-  ["dune","a hill of sand"],
-  ["dusk","the time just after sunset"],
-  ["dust","fine dry powder"],
-  ["duty","a moral or legal obligation"],
-  ["dwell","to live in a place"],
-  ["dye","a substance used to change color"],
-  ["each","every individual one"],
-  ["earn","to receive as payment for work"],
-  ["east","the direction of sunrise"],
-  ["easy","requiring little effort"],
-  ["echo","a sound reflected back"],
-  ["edit","to prepare text for publication"],
-  ["emit","to give out or send forth"],
-  ["epic","heroic or impressively large"],
-  ["even","flat and smooth or divisible by two"],
-  ["evil","profoundly immoral"],
-  ["exam","a formal test of knowledge"],
-  ["exit","a way out or to leave"],
-  ["expo","a large public exhibition"],
-  ["faint","barely perceptible or to lose consciousness"],
-  ["fair","treating people equally"],
-  ["fake","not genuine"],
-  ["fame","being known by many people"],
-  ["fare","the price paid for travel"],
-  ["farm","an area of land for growing crops"],
-  ["fate","events outside control"],
-  ["fawn","a young deer or light brown color"],
-  ["faze","to disturb the composure of"],
-  ["feat","an achievement requiring skill"],
-  ["feed","to give food to"],
-  ["feet","plural of foot"],
-  ["felt","past tense of feel"],
-  ["fend","to defend or look after oneself"],
-  ["fern","a flowerless plant with fronds"],
-  ["fist","a tightly closed hand"],
-  ["five","the number after four"],
-  ["fizz","to produce bubbles"],
-  ["flag","a piece of cloth used as a symbol"],
-  ["flap","to move up and down"],
-  ["flaw","an imperfection in something"],
-  ["flea","a small jumping insect"],
-  ["flew","past tense of fly"],
-  ["flex","to bend a limb"],
-  ["flip","to turn over quickly"],
-  ["flit","to move swiftly and lightly"],
-  ["flow","to move smoothly"],
-  ["foam","a mass of bubbles"],
-  ["foe","an enemy"],
-  ["fold","to bend over itself"],
-  ["folk","people in general"],
-  ["fond","having an affection for"],
-  ["font","a set of characters in one style"],
-  ["ford","a shallow crossing in a river"],
-  ["fore","at or near the front"],
-  ["fork","a utensil with prongs"],
-  ["fort","a fortified building"],
-  ["foul","offensive or against the rules"],
-  ["four","the number after three"],
-  ["fowl","a domestic bird"],
-  ["fray","to unravel at the edges"],
-  ["fret","to be constantly worried"],
-  ["fuel","material burned to produce energy"],
-  ["fume","to emit gas or smoke"],
-  ["fund","a sum of money saved"],
-  ["funk","a state of depression or music style"],
-  ["fuse","a safety device or to join together"],
-  ["fuzz","a fluffy mass or indistinctness"],
-  ["gale","a very strong wind"],
-  ["gall","bold behavior or bile"],
-  ["gash","a long deep cut"],
-  ["gate","a movable barrier"],
-  ["gaze","to look steadily"],
-  ["gear","equipment or a toothed wheel"],
-  ["germ","a microorganism causing disease"],
-  ["gist","the main point of something"],
-  ["give","to freely transfer something"],
-  ["glee","great delight"],
-  ["glen","a narrow valley"],
-  ["glob","a lump of a semi-liquid substance"],
-  ["glow","to emit a steady light"],
-  ["glue","a sticky substance"],
-  ["gnat","a small biting insect"],
-  ["gnaw","to bite persistently"],
-  ["goad","to provoke or stimulate"],
-  ["goal","an aim or objective"],
-  ["goat","a horned ruminant animal"],
-  ["gore","blood from a wound"],
-  ["gown","a long dress or robe"],
-  ["grab","to take hold suddenly"],
-  ["gram","a unit of mass"],
-  ["grin","a broad smile"],
-  ["grip","to hold firmly"],
-  ["grit","small particles of sand"],
-  ["groom","to clean and maintain"],
-  ["gust","a sudden strong wind"],
-  ["guts","courage or intestines"],
-  ["hack","to cut roughly"],
-  ["hale","strong and healthy"],
-  ["halt","to stop moving"],
-  ["haze","a slight obscuration in the air"],
-  ["head","the top part of the body"],
-  ["heal","to become healthy again"],
-  ["heap","a pile of things"],
-  ["heat","the quality of being hot"],
-  ["heed","to pay attention to"],
-  ["helm","a steering device for a ship"],
-  ["herb","a plant used in cooking"],
-  ["herd","a large group of animals"],
-  ["hewn","cut or shaped with an axe"],
-  ["hide","to put out of sight"],
-  ["hire","to employ someone"],
-  ["hiss","to make a sharp sibilant sound"],
-  ["hoax","a deceptive trick"],
-  ["hoop","a circular band"],
-  ["hose","a flexible pipe for water"],
-  ["host","a person who receives guests"],
-  ["howl","a long loud cry"],
-  ["hull","the body of a ship"],
-  ["hump","a rounded protuberance"],
-  ["hung","past tense of hang"],
-  ["hunk","a large piece of something"],
-  ["hunt","to pursue animals for food"],
-  ["hurl","to throw with great force"],
-  ["hymn","a religious song of praise"],
-  ["inch","a unit of length"],
-  ["inky","covered with or dark as ink"],
-  ["into","expressing entry or direction"],
-  ["iris","a flowering plant or part of the eye"],
-  ["isle","a small island"],
-  ["itch","an irritating sensation"],
-  ["ivory","a hard white material from tusks"],
-  ["jade","a green gemstone"],
-  ["jail","a place of confinement"],
-  ["jeer","to make rude remarks"],
-  ["jolt","a sudden movement"],
-  ["keen","sharp or eager"],
-  ["kelp","a large brown seaweed"],
-  ["kern","the central part of a typeface"],
-  ["kick","to strike with the foot"],
-  ["king","a male ruler of a country"],
-  ["kite","a light frame flown in the wind"],
-  ["kiwi","a flightless bird or a green fruit"],
-  ["lace","a delicate fabric or to fasten"],
-  ["lack","to be without something"],
-  ["lame","unable to walk or unconvincing"],
-  ["lank","long and limp"],
-  ["lard","pig fat used in cooking"],
-  ["lark","a songbird or a playful adventure"],
-  ["lash","to strike or fasten tightly"],
-  ["last","coming after all others"],
-  ["lava","molten rock from a volcano"],
-  ["lawn","an area of short mown grass"],
-  ["lean","to incline or thin"],
-  ["leer","to look in a lascivious way"],
-  ["lend","to give temporarily"],
-  ["lens","a curved piece of glass"],
-  ["limp","to walk unevenly"],
-  ["lint","short fine fibers from fabric"],
-  ["lion","a large wild cat"],
-  ["lisp","to pronounce s as th"],
-  ["list","a series of items"],
-  ["loft","a room or space under the roof"],
-  ["loom","to appear large or threatening"],
-  ["lore","a body of traditional knowledge"],
-  ["lorn","lonely or abandoned"],
-  ["loss","the fact of losing something"],
-  ["lost","unable to find the way"],
-  ["lump","a hard or compact mass"],
-  ["lung","an organ used for breathing"],
-  ["lurk","to be hidden or wait in ambush"],
-  ["lush","growing luxuriantly"],
-  ["lust","a strong desire"],
-  ["lynx","a wild cat with tufted ears"],
-  ["lyre","an ancient stringed instrument"]
+  ["time","a measured period or moment"],["year","a period of 12 months"],["hand","the part of the arm beyond the wrist"],["part","a piece or section of something"],["home","the place where one lives"],["face","the front of the head"],["name","a word used to identify a person or thing"],["life","the state of being alive"],["line","a long thin mark or boundary"],["back","the rear side of something"],["side","a surface or edge of something"],["food","substance eaten for nourishment"],["work","activity involving effort or labor"],["door","a movable barrier for an entrance"],["room","an enclosed space within a building"],["body","the physical structure of a person"],["form","the shape or structure of something"],["city","a large town or urban area"],["town","a settlement smaller than a city"],["land","solid ground or territory"],["park","an open green area for recreation"],["road","a paved path for vehicles"],["path","a track or route"],["tree","a tall woody plant with branches"],["bird","a feathered winged animal"],["fish","a cold-blooded aquatic animal"],["book","a written or printed work"],["song","a musical composition with lyrics"],["game","an activity done for entertainment"],["fire","the rapid oxidation producing heat and light"],["rain","water falling from clouds"],["wind","moving air"],["snow","frozen water crystals falling from the sky"],["star","a luminous ball of gas in space"],["moon","the natural satellite of the earth"],["lake","a large inland body of water"],["hill","a raised area of land"],["rock","a solid mineral material"],["sand","fine grains of mineral material"],["gold","a precious yellow metal"],["iron","a common strong metal"],["milk","a white liquid produced by mammals"],["salt","a mineral used to season food"],["soap","a cleansing agent"],["rose","a flowering plant with thorns"],["leaf","a flat green part of a plant"],["seed","a plant embryo"],["root","the underground part of a plant"],["stem","the main stalk of a plant"],["wing","a limb used for flying"],["tail","the rear appendage of an animal"],["beak","the bill of a bird"],["claw","a sharp curved nail"],["nest","a structure where birds lay eggs"],["cage","an enclosure for animals"],["rope","a thick twisted cord"],["nail","a small metal spike"],["wire","a thin metal thread"],["pipe","a hollow tube"],["wall","a vertical structure"],["roof","the top covering of a building"],["step","a single stair or footfall"],["desk","a writing table"],["lamp","a light-giving device"],["bell","a hollow metal object that rings"],["ring","a circular band"],["ball","a round object used in sports"],["boat","a small watercraft"],["ship","a large watercraft"],["cart","a wheeled vehicle"],["bike","a two-wheeled vehicle"],["drum","a percussion instrument"],["horn","a wind instrument"],["harp","a stringed instrument"],["flute","a woodwind instrument"],["piano","a musical keyboard instrument"],["apple","a red or green fruit"],["grape","a small fruit in clusters"],["lemon","a yellow citrus fruit"],["mango","a tropical fruit"],["peach","a soft fuzzy fruit"],["plum","a small purple fruit"],["pear","a sweet juicy fruit"],["lime","a small green citrus fruit"],["corn","a yellow grain vegetable"],["bean","a seed pod vegetable"],["mint","an aromatic herb"],["sage","a culinary herb"],["rice","a grain staple food"],["meat","animal flesh used as food"],["beef","meat from cattle"],["pork","meat from pigs"],["lamb","meat from young sheep"],["cake","a sweet baked dessert"],["bread","a baked food from flour"],["soup","a liquid food dish"],["stew","a slow-cooked dish"],["chip","a thin crispy snack"],["blue","the color of the sky"],["pink","a light red color"],["gray","a neutral color between black and white"],["dark","having little light"],["soft","not hard or firm"],["hard","solid and firm"],["warm","moderately hot"],["cool","moderately cold"],["fast","moving quickly"],["slow","not moving quickly"],["tall","of great height"],["wide","of great width"],["deep","extending far down"],["thin","having little thickness"],["flat","having a level surface"],["round","having a circular shape"],["long","having great length"],["near","close in distance"],["safe","free from danger"],["wild","living in nature"],["free","not restricted"],["full","containing as much as possible"],["kind","having a friendly nature"],["bold","showing courage"],["calm","free from agitation"],["dear","regarded with affection"],["glad","feeling happy"],["huge","very large"],["idle","not working"],["keen","eager and enthusiastic"],["lazy","unwilling to work"],["mild","not extreme"],["neat","tidy and orderly"],["pale","light in color"],["pure","not mixed"],["rare","not common"],["rich","having great wealth"],["rude","not polite"],["tame","not wild"],["vain","having too much pride"],["vast","very large in area"],["walk","to move on foot"],["jump","to leap into the air"],["swim","to move through water"],["sing","to make musical sounds"],["play","to engage in fun activity"],["read","to look at and understand text"],["draw","to make a picture"],["cook","to prepare food with heat"],["bake","to cook in an oven"],["wash","to clean with water"],["build","to construct something"],["grow","to increase in size"],["close","to shut"],["start","to begin"],["push","to apply force away from oneself"],["pull","to draw toward oneself"],["lift","to raise upward"],["drop","to let fall"],["hold","to keep in hand"],["send","to cause to go"],["find","to discover"],["keep","to retain"],["give","to transfer to another"],["take","to receive"],["make","to create"],["help","to assist"],["hope","to wish for"],["love","a deep affection"],["fear","an unpleasant emotion from danger"],["hate","strong dislike"],["care","to feel concern"],["wait","to stay until something happens"],["call","to speak loudly or phone"],["talk","to speak"],["hear","to perceive sound"],["look","to direct eyes toward"],["feel","to experience a sensation"],["know","to be aware of"],["think","to use the mind"],["want","to desire"],["need","to require"],["like","to find pleasant"],["live","to be alive"],["move","to change position"],["turn","to rotate"],["fall","to drop down"],["stand","to be upright"],["bring","to carry here"],["show","to display"],["tell","to communicate information"],["meet","to come together"],["leave","to go away from"],["learn","to gain knowledge"],["teach","to give knowledge"],["study","to apply the mind to learning"],["smile","a happy facial expression"],["laugh","to express amusement"],["sleep","a state of rest"],["dream","images during sleep"],["speak","to talk"],["climb","to go up"],["dance","to move rhythmically"],["fight","to engage in combat"],["catch","to capture or seize"],["throw","to propel through the air"],["break","to separate into pieces"],["shake","to move back and forth"],["touch","to make contact"],["taste","to sense flavor"],["smell","to sense odor"],["watch","to observe"],["check","to examine"],["count","to enumerate"],["cover","to place over"],["enter","to go into"],["enjoy","to take pleasure in"],["avoid","to keep away from"],["allow","to permit"],["offer","to present for acceptance"],["reach","to stretch out to"],["serve","to work for"],["share","to divide among others"],["spend","to use time or money"],["solve","to find an answer"],["store","to keep for future use"],["track","to follow the trail of"],["train","to teach skills"],["trust","to believe in"],["visit","to go to see"],["waste","to use carelessly"],["world","the earth and all life"],["house","a building for living in"],["water","a clear liquid essential for life"],["music","organized sound"],["night","the period of darkness"],["light","electromagnetic radiation"],["heart","the organ that pumps blood"],["earth","the planet we live on"],["place","a particular location"],["thing","an object"],["point","a specific location"],["group","a collection of things"],["state","a condition or territory"],["whole","complete and entire"],["level","a position on a scale"],["power","the ability to do something"],["money","a medium of exchange"],["story","an account of events"],["class","a group of students"],["paper","a thin material for writing"],["north","the direction toward the North Pole"],["south","the direction toward the South Pole"],["young","not old"],["large","of great size"],["small","of little size"],["human","relating to people"],["local","relating to a nearby area"],["early","before the expected time"],["horse","a large domesticated animal"],["camel","a desert animal with humps"],["tiger","a large striped wild cat"],["eagle","a large bird of prey"],["shark","a large predatory fish"],["whale","a very large sea mammal"],["snake","a legless reptile"],["frog","a small amphibian"],["crane","a large wading bird"],["panda","a black and white bear"],["koala","an Australian marsupial"],["zebra","a striped African animal"],["moose","a large deer-like animal"],["otter","a semi-aquatic mammal"],["river","a large natural stream"],["ocean","a large body of salt water"],["beach","sandy shore by the sea"],["cloud","a mass of water vapor"],["storm","a violent weather event"],["frost","ice crystals on surfaces"],["flame","burning fire light"],["smoke","gas from burning material"],["shade","darkness from blocked light"],["field","open land for farming"],["forest","a large area of trees"],["valley","low land between hills"],["bridge","a structure over water"],["tower","a tall narrow structure"],["castle","a large fortified building"],["church","a place of worship"],["school","a place for learning"],["hotel","a place to stay"],["market","a place to buy and sell"],["garden","a place to grow plants"],["island","land surrounded by water"],["planet","a large body orbiting a star"],["spring","the season after winter"],["summer","the warmest season"],["autumn","the season before winter"],["winter","the coldest season"],["morning","the early part of the day"],["evening","the late part of the day"],["minute","sixty seconds"],["second","one sixtieth of a minute"],["mother","a female parent"],["father","a male parent"],["sister","a female sibling"],["brother","a male sibling"],["friend","a person you like"],["doctor","a medical professional"],["nurse","a healthcare worker"],["artist","a person who creates art"],["farmer","a person who farms"],["hunter","a person who hunts"],["leader","a person who leads"],["player","a person who plays"],["singer","a person who sings"],["writer","a person who writes"],["dancer","a person who dances"],["winner","a person who wins"],["master","a person with great skill"],["worker","a person who works"],["driver","a person who drives"],["baker","a person who bakes"],["sailor","a person who sails"],["runner","a person who runs"],["smart","having good judgment"],["brave","showing courage"],["angry","feeling strong displeasure"],["happy","feeling pleasure"],["lucky","having good fortune"],["funny","causing amusement"],["crazy","mentally unstable"],["dizzy","feeling unsteady"],["messy","untidy and disorganized"],["noisy","making a lot of sound"],["shiny","reflecting light brightly"],["spicy","having a strong flavor"],["sunny","bright with sunlight"],["windy","with much wind"],["rainy","with much rain"],["foggy","filled with fog"],["muddy","covered with mud"],["dusty","covered with dust"],["rusty","covered with rust"],["cheek","the side of the face"],["elbow","the joint in the middle of the arm"],["ankle","the joint between foot and leg"],["thumb","the short thick finger"],["skull","the bony framework of the head"],["spine","the backbone"],["liver","a vital organ"],["nerve","a fiber that transmits impulses"],["blood","the red fluid in the body"],["brain","the organ of thought"],["tooth","a hard structure in the mouth"],["chest","the front of the torso"],["belly","the abdomen"],["crown","the top of the head"],["palm","the inner surface of the hand"],["wrist","the joint between hand and arm"],["knee","the joint in the middle of the leg"],["blade","a flat cutting edge"],["arrow","a projectile shot from a bow"],["sword","a long bladed weapon"],["spear","a long pointed weapon"],["shield","a protective device"],["fence","a barrier around an area"],["creek","a small stream"],["brook","a small stream"],["swamp","a wetland area"],["plain","flat open land"],["slope","a surface at an angle"],["cliff","a steep rock face"],["cave","a hollow in the earth"],["canal","a man-made waterway"],["wheel","a circular rotating object"],["chain","a series of linked rings"],["cable","a thick wire or rope"],["screw","a threaded fastener"],["drill","a tool for making holes"],["brush","a tool with bristles"],["broom","a sweeping tool"],["cloth","woven fabric"],["linen","a fabric made from flax"],["wool","fiber from sheep"],["silk","a fine natural fiber"],["denim","a sturdy cotton fabric"],["stamp","to press a mark onto"],["brand","a mark identifying a product"],["label","a tag with information"],["medal","an award given for achievement"],["prize","a reward for winning"],["bonus","extra pay or reward"],["limit","a maximum or boundary"],["ratio","a relationship between quantities"],["scale","a range of values"],["range","the extent of variation"],["depth","the distance downward"],["width","the measurement across"],["speed","the rate of movement"],["angle","the space between two lines"],["curve","a smoothly bending line"],["solid","a firm three-dimensional object"],["shape","the outer form of an object"],["model","a representation of something"],["image","a picture or likeness"],["photo","a picture taken by a camera"],["frame","a border or structure"],["plate","a flat dish for food"],["bowl","a round deep dish"],["glass","a container for drinking"],["spoon","a utensil for eating liquids"],["knife","a cutting utensil"],["flask","a container for liquids"],["shelf","a flat board for storage"],["closet","a small storage room"],["attic","a space just below the roof"],["porch","a covered entrance to a building"],["lobby","an entrance hall"],["stair","a step in a staircase"],["ledge","a narrow horizontal surface"],["sketch","a rough drawing"],["claim","an assertion of something"],["shame","a painful feeling of guilt"],["pride","satisfaction in achievements"],["greed","excessive desire for wealth"],["anger","a strong feeling of displeasure"],["grief","deep sorrow"],["worry","a state of anxiety"],["doubt","a feeling of uncertainty"],["faith","complete trust or confidence"],["peace","freedom from conflict"],["grace","elegance of movement"],["charm","the power to attract"],["magic","mysterious power"],["spell","a form of words with magic"],["ghost","the spirit of a dead person"],["angel","a divine spiritual being"],["demon","an evil spirit"],["fable","a short story with a moral"],["verse","writing arranged in lines"],["rhyme","words with similar sounds"],["theme","the main subject of a work"],["topic","a subject of discussion"],["event","something that happens"],["scene","a place where something occurs"],["stage","a platform for performance"],["drama","a play or exciting event"],["effect","a result or outcome"],["cause","a reason for something"],["logic","systematic reasoning"],["input","data put into a system"],["noise","unwanted sound or data"],["error","a mistake"],["fault","a defect or mistake"],["crack","a line of breakage"],["stain","a discoloration"],["patch","a piece used to repair"],["edge","the border of something"],["border","a boundary between areas"],["zone","an area with particular features"],["region","a large area of land"],["realm","a kingdom or field of activity"],["acid","a corrosive chemical substance"],["arch","a curved structure spanning an opening"],["area","a particular region or space"],["army","a large organized military force"],["aunt","the sister of a parent"],["bald","having no hair on the head"],["band","a flat strip or group of musicians"],["bang","a sudden loud noise"],["bank","a financial institution"],["barn","a large farm building"],["bath","a washing of the body"],["beam","a ray of light or a structural timber"],["beat","to strike repeatedly"],["beer","an alcoholic drink made from grain"],["beet","a root vegetable with red flesh"],["bite","to cut with teeth"],["blow","to move air with force"],["bone","a rigid tissue forming the skeleton"],["boom","a loud deep sound or rapid growth"],["boot","a sturdy covering for the foot"],["boss","a person in charge"],["brew","to make beer or coffee"],["bull","an adult male bovine animal"],["bump","a small raised area or collision"],["burn","to be on fire"],["buzz","a low humming sound"],["cape","a sleeveless cloak or piece of land"],["card","a flat piece of stiff paper"],["cash","money in coins or notes"],["cast","to throw or assign roles"],["cell","a small room or basic unit of life"],["chat","to talk in a friendly way"],["chew","to crush food with teeth"],["chop","to cut with a sharp blow"],["clay","a stiff earthy material"],["clip","to cut or fasten"],["clue","a piece of evidence"],["coal","a black solid fuel"],["coat","an outer garment"],["coil","a series of loops"],["coin","a metal disc used as money"],["cold","low in temperature"],["comb","a toothed device for hair"],["cone","a three-dimensional shape"],["cope","to deal with difficulties"],["cord","a length of string"],["core","the central part of something"],["cork","a buoyant material from bark"],["cost","the price of something"],["crew","a group working together"],["crop","a cultivated plant or to cut short"],["crow","a black bird or to boast"],["cube","a three-dimensional square shape"],["cute","attractive in a pretty way"],["damp","slightly wet"],["dare","to have the courage to do something"],["dart","a small pointed missile"],["dash","to move quickly or a small mark"],["dawn","the first light of day"],["dead","no longer alive"],["deaf","unable to hear"],["deal","an agreement or to distribute"],["debt","money owed to another"],["deck","a flat surface or a set of cards"],["deny","to refuse or contradict"],["dime","a ten-cent coin"],["dine","to eat dinner"],["dirt","loose soil or filth"],["dive","to plunge into water headfirst"],["dome","a rounded vault forming a roof"],["dose","a measured amount of medicine"],["dove","a white bird symbolizing peace"],["drab","dull or lacking brightness"],["drag","to pull with effort"],["drip","to fall in small drops"],["drug","a medicine or substance"],["dull","lacking brightness or interest"],["dune","a hill of sand"],["dusk","the time just after sunset"],["dust","fine dry powder"],["earn","to receive as payment for work"],["east","the direction of sunrise"],["easy","requiring little effort"],["echo","a sound reflected back"],["edit","to prepare text for publication"],["emit","to give out or send forth"],["epic","heroic or impressively large"],["even","flat and smooth"],["evil","profoundly immoral"],["exam","a formal test of knowledge"],["exit","a way out or to leave"],["fair","treating people equally"],["fake","not genuine"],["fame","being known by many people"],["fare","the price paid for travel"],["farm","an area of land for growing crops"],["fate","events outside control"],["feat","an achievement requiring skill"],["feed","to give food to"],["felt","past tense of feel"],["fern","a flowerless plant with fronds"],["fist","a tightly closed hand"],["flag","a piece of cloth used as a symbol"],["flaw","an imperfection in something"],["flea","a small jumping insect"],["flex","to bend a limb"],["flow","to move smoothly"],["foam","a mass of bubbles"],["fold","to bend over itself"],["folk","people in general"],["fond","having an affection for"],["fork","a utensil with prongs"],["fort","a fortified building"],["four","the number after three"],["fuel","material burned to produce energy"],["fund","a sum of money saved"],["fuse","a safety device or to join together"],["gale","a very strong wind"],["gate","a movable barrier"],["gaze","to look steadily"],["gear","equipment or a toothed wheel"],["germ","a microorganism causing disease"],["glee","great delight"],["glow","to emit a steady light"],["glue","a sticky substance"],["goal","an aim or objective"],["goat","a horned ruminant animal"],["gown","a long dress or robe"],["grab","to take hold suddenly"],["gram","a unit of mass"],["grin","a broad smile"],["grip","to hold firmly"],["gust","a sudden strong wind"],["hack","to cut roughly"],["halt","to stop moving"],["haze","a slight obscuration in the air"],["head","the top part of the body"],["heal","to become healthy again"],["heap","a pile of things"],["heat","the quality of being hot"],["helm","a steering device for a ship"],["herb","a plant used in cooking"],["herd","a large group of animals"],["hide","to put out of sight"],["hire","to employ someone"],["hoop","a circular band"],["hose","a flexible pipe for water"],["host","a person who receives guests"],["howl","a long loud cry"],["hunt","to pursue animals for food"],["inch","a unit of length"],["iris","a flowering plant or part of the eye"],["isle","a small island"],["itch","an irritating sensation"],["jade","a green gemstone"],["jail","a place of confinement"],["jolt","a sudden movement"],["kelp","a large brown seaweed"],["kick","to strike with the foot"],["king","a male ruler of a country"],["kite","a light frame flown in the wind"],["kiwi","a flightless bird or a green fruit"],["lace","a delicate fabric or to fasten"],["lack","to be without something"],["lard","pig fat used in cooking"],["lash","to strike or fasten tightly"],["last","coming after all others"],["lava","molten rock from a volcano"],["lawn","an area of short mown grass"],["lean","to incline or thin"],["lend","to give temporarily"],["lens","a curved piece of glass"],["limp","to walk unevenly"],["lion","a large wild cat"],["list","a series of items"],["loft","a room or space under the roof"],["loss","the fact of losing something"],["lump","a hard or compact mass"],["lung","an organ used for breathing"],["lush","growing luxuriantly"],["lynx","a wild cat with tufted ears"],["mast","a tall pole on a ship"],["maze","a complex network of paths"],["melt","to change from solid to liquid"],["mesh","a network of threads"],["mild","not extreme in any way"],["mist","thin fog"],["moan","a low sound of pain"],["molt","to shed feathers or skin"],["monk","a member of a religious order"],["moss","a small flowerless plant"],["mule","a hybrid of horse and donkey"],["musk","a strong-smelling substance"],["mute","unable to speak or silent"],["navy","a country's naval force"],["neck","the part connecting head to body"],["neon","a colorless noble gas"],["newt","a small lizard-like amphibian"],["node","a point in a network"],["noon","midday"],["norm","a standard or pattern"],["note","a short written message"],["oath","a solemn promise"],["obey","to follow instructions"],["odor","a distinctive smell"],["omen","a sign of future events"],["once","one time only"],["onyx","a black gemstone"],["oval","egg-shaped"],["oven","a heated cooking chamber"],["pace","a single step or rate of movement"],["pack","to put things together"],["pact","a formal agreement"],["pale","light in color"],["pave","to cover with a hard material"],["peak","the pointed top of a mountain"],["peel","to remove the outer layer"],["peel","the skin of a fruit"],["peen","the head of a hammer"],["peg","a small pin or bolt"],["pelt","the skin of an animal"],["pest","a harmful insect or animal"],["pike","a large freshwater fish"],["pile","a heap of things"],["pill","a small tablet of medicine"],["pine","an evergreen tree or to yearn"],["pint","a unit of liquid measurement"],["plea","an urgent request"],["plot","a plan or a small piece of land"],["plow","a farming tool for turning soil"],["plug","a device to block a hole"],["plus","in addition to"],["poem","a literary composition in verse"],["pole","a long rod or the Earth's axis"],["poll","a survey of opinions"],["pond","a small body of water"],["pool","a small area of water"],["pope","the head of the Catholic Church"],["pose","to position or a way of standing"],["post","a pole or to send mail"],["prey","an animal hunted for food"],["prop","a support or theatrical object"],["pulp","soft moist material"],["punt","a flat-bottomed boat or a kick"],["pyre","a pile of wood for burning"],["quiz","a test of knowledge"],["rack","a framework for storage"],["raft","a flat floating structure"],["rage","violent uncontrolled anger"],["raid","a sudden attack"],["ramp","a sloping surface"],["rank","a position in a hierarchy"],["rant","to speak angrily"],["rasp","a coarse file or harsh sound"],["reef","a ridge of coral or rock"],["reel","a spool or to stagger"],["rely","to depend on"],["rent","to pay to use property"],["rest","to relax or what remains"],["rind","the outer layer of fruit"],["riot","a violent public disturbance"],["ripe","fully grown and ready to eat"],["risk","the possibility of harm"],["roam","to travel without direction"],["roar","a loud deep sound"],["robe","a long loose garment"],["role","a function or part played"],["roost","a place where birds rest"],["ruin","to destroy or remains of a building"],["rule","a regulation or to govern"],["ruse","a trick or stratagem"],["rust","corrosion on metal"],["rut","a groove or a fixed routine"],["saga","a long heroic story"],["sail","to travel by boat or a boat's fabric"],["scar","a mark left by a wound"],["scam","a dishonest scheme"],["scar","a mark from a healed wound"],["seal","a marine animal or to close"],["seep","to flow slowly through"],["self","a person's essential being"],["sell","to exchange for money"],["shed","a small storage building"],["shin","the front of the lower leg"],["sigh","a long deep breath"],["silo","a tower for storing grain"],["sink","to go below a surface"],["skew","to turn at an angle"],["slab","a flat thick piece of material"],["slam","to shut forcefully"],["slap","to hit with the palm"],["sled","a vehicle on runners for snow"],["slew","a large number"],["slim","thin and slight"],["slip","to slide accidentally"],["slot","a narrow opening"],["slug","a slow garden creature"],["slum","a poor overcrowded area"],["snap","to break suddenly"],["snip","to cut with scissors"],["snob","a person who looks down on others"],["snug","comfortable and cozy"],["soak","to make thoroughly wet"],["soar","to fly high"],["sock","a garment covering the foot"],["soot","black powder from fire"],["sort","to arrange by type"],["soul","the spiritual part of a person"],["soup","a liquid food made by boiling"],["span","the length from end to end"],["spar","to fight or a pole"],["spin","to rotate rapidly"],["spit","to expel from the mouth"],["slab","a flat thick piece"],["stab","to pierce with a pointed object"],["stem","the main stalk of a plant"],["stir","to mix by moving around"],["stub","a short remnant"],["stun","to make unconscious"],["suck","to draw in by creating a vacuum"],["suit","a set of matching clothes"],["sulk","to be silently resentful"],["sump","a pit for collecting liquid"],["sung","past tense of sing"],["sunk","past tense of sink"],["surf","waves breaking on shore"],["swan","a large white water bird"],["swap","to exchange"],["swat","to hit"],["sway","to move back and forth"],["swear","to make a solemn promise"],["sweat","moisture from the body when hot"],["sweep","to clean with a broom"],["swell","to become larger"],["swim","to move through water"],["swoop","to move in a curve downward"],["tack","a short nail or to change direction"],["tame","not wild or to domesticate"],["tart","sharp in taste or a pastry"],["task","a piece of work to be done"],["team","a group working together"],["tear","to rip or a drop from the eye"],["teem","to swarm or be full of"],["tent","a portable shelter"],["term","a word or a period of time"],["test","an examination"],["text","written words"],["tick","a small mark or a parasite"],["tilt","to lean to one side"],["toad","a frog-like amphibian"],["toil","hard work"],["toll","a charge for using a road"],["tomb","a burial chamber"],["toss","to throw lightly"],["tour","a journey visiting places"],["tow","to pull along"],["trap","a device to catch animals"],["trim","to cut neatly"],["trio","a group of three"],["trip","a journey or to stumble"],["trot","a pace between walk and run"],["troy","a system of weights"],["tuft","a bunch of threads or grass"],["twig","a small branch"],["twirl","to spin around"],["ulna","a bone of the forearm"],["undo","to reverse an action"],["unit","a single thing"],["upon","on top of"],["urge","to encourage strongly"],["vain","having too much pride"],["vale","a valley"],["veil","a piece of fine material"],["venom","poison from a snake or spider"],["vest","a sleeveless garment"],["vibe","a mood or atmosphere"],["view","what can be seen"],["vine","a climbing plant"],["vow","a solemn promise"],["wade","to walk through water"],["wane","to decrease in strength"],["warp","to become bent or twisted"],["wart","a small growth on the skin"],["wax","a solid fatty substance"],["weld","to join metals by heat"],["well","a hole for water or in good health"],["went","past tense of go"],["west","the direction of sunset"],["wick","a cord in a candle"],["wilt","to droop or lose energy"],["wimp","a weak person"],["wink","to close one eye briefly"],["wipe","to clean by rubbing"],["wolf","a wild canine animal"],["womb","where babies develop"],["wren","a small singing bird"],["wring","to twist and squeeze"],["yank","to pull sharply"],["yarn","thread for knitting or a story"],["yawn","to open mouth wide when tired"],["yell","to shout loudly"],["zinc","a metallic element"],["zone","an area set apart for a purpose"],["zoom","to move very quickly"]
 ];
 
-// Filter: only alphabetic words with length 4-8, and at least 3 chars (to allow hiding 1 non-first/last)
+// ── Encouragement Messages ──────────────────────────────────────────────────
+const ENC_MESSAGES = [
+  { emoji: "🎉", msg: "太棒了！連續答對10題！", sub: "你的英文真的很好！繼續保持！" },
+  { emoji: "🌟", msg: "你是英文小天才！", sub: "20題全對！你實在太厲害了！" },
+  { emoji: "🏆", msg: "獎盃送給你！", sub: "30題！你是今天的英文冠軍！" },
+  { emoji: "🚀", msg: "一飛沖天的進步！", sub: "40題！繼續，你快無敵了！" },
+  { emoji: "💪", msg: "你的毅力令人佩服！", sub: "50題！這種精神值得稱讚！" },
+  { emoji: "🌈", msg: "彩虹都為你出現！", sub: "60題！你已經是英文高手了！" },
+  { emoji: "🦁", msg: "英文界的獅子王！", sub: "70題！你的能力讓人驚嘆！" },
+  { emoji: "✨", msg: "閃閃發光的你！", sub: "80題！每一題都是你的榮耀！" },
+  { emoji: "🎓", msg: "值得頒發英文博士學位！", sub: "90題！你的努力有目共睹！" },
+  { emoji: "🥇", msg: "無人能及的金牌選手！", sub: "100題！傳奇就是你！" },
+  { emoji: "🌺", msg: "你像花一樣燦爛！", sub: "繼續盛開，英文花園因你而美麗！" },
+  { emoji: "🎵", msg: "英文節拍，你掌握得剛剛好！", sub: "韻律和單字都是你的強項！" },
+  { emoji: "🦋", msg: "破繭而出的英文蝴蝶！", sub: "每一個答案都是你成長的見證！" },
+  { emoji: "⭐", msg: "星光璀璨就是你！", sub: "你的英文能力讓星星都羨慕！" },
+  { emoji: "🎯", msg: "百發百中的神射手！", sub: "精準、快速、厲害！就是你！" },
+  { emoji: "🏅", msg: "每一分都是汗水換來的！", sub: "你的努力無人能比！" },
+  { emoji: "🌙", msg: "英文月亮，照亮你的未來！", sub: "繼續學習，前途無量！" },
+  { emoji: "🎪", msg: "你是英文舞台上的明星！", sub: "全場目光都集中在你身上！" },
+  { emoji: "🦅", msg: "展翅高飛的英文雄鷹！", sub: "你的高度，沒有人能阻擋！" },
+  { emoji: "💎", msg: "你是最閃耀的鑽石！", sub: "歷經磨礪，才能如此光芒四射！" },
+];
+
+// ── State ───────────────────────────────────────────────────────────────────
 const VALID_WORDS = WORDS.filter(([w]) => /^[a-zA-Z]{4,8}$/.test(w));
+let shuffledQueue = [];
+let currentWord = "", currentMeaning = "", hiddenIndex = -1, correctAnswer = "";
+let hintUsed = false, answered = false;
+let score = 0, correctCount = 0, totalCount = 0;
+let encourageShown = 0; // how many encouragement messages shown
+let playerName = "";
+let encIndex = 0;
 
-let currentWord = "";
-let currentMeaning = "";
-let hiddenIndex = -1;
-let correctAnswer = "";
-let hintUsed = false;
-let answered = false;
-let score = 0;
-let correctCount = 0;
-let totalCount = 0;
-let usedLetters = {}; // letter -> 'correct'|'wrong'
+// ── localStorage Keys ────────────────────────────────────────────────────────
+const LS_NAME     = "cloze_player_name";
+const LS_REMEMBER = "cloze_remember";
+const LS_SCORES   = "cloze_scores";      // array of {name, score}
+const LS_PLAYERS  = "cloze_total_players";
 
-function pickWord() {
-  const idx = Math.floor(Math.random() * VALID_WORDS.length);
-  return VALID_WORDS[idx];
+// ── Init Player ──────────────────────────────────────────────────────────────
+function initPlayer() {
+  const remember = localStorage.getItem(LS_REMEMBER) === "true";
+  document.getElementById("remember-me").checked = remember;
+  if (remember) {
+    const savedName = localStorage.getItem(LS_NAME) || "";
+    if (savedName) {
+      document.getElementById("player-name").value = savedName;
+      playerName = savedName;
+      showGreeting();
+    }
+  }
 }
 
+function saveName() {
+  const input = document.getElementById("player-name");
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  playerName = name;
+  const remember = document.getElementById("remember-me").checked;
+  localStorage.setItem(LS_REMEMBER, remember);
+  if (remember) {
+    localStorage.setItem(LS_NAME, name);
+  } else {
+    localStorage.removeItem(LS_NAME);
+  }
+
+  // Count this player
+  registerPlayer(name);
+  showGreeting();
+}
+
+function showGreeting() {
+  document.getElementById("name-input-row").style.display = "none";
+  const g = document.getElementById("player-greeting");
+  g.style.display = "block";
+  g.textContent = `🌸 歡迎，${playerName}！祝你答題順利！`;
+  updateLeaderboard();
+  updatePlayerStats();
+}
+
+// ── Player / Leaderboard Data ─────────────────────────────────────────────────
+function getScores() {
+  try { return JSON.parse(localStorage.getItem(LS_SCORES)) || []; } catch { return []; }
+}
+function saveScores(arr) {
+  localStorage.setItem(LS_SCORES, JSON.stringify(arr));
+}
+function getTotalPlayers() {
+  return parseInt(localStorage.getItem(LS_PLAYERS) || "0");
+}
+function registerPlayer(name) {
+  let total = getTotalPlayers();
+  const scores = getScores();
+  // Only increment if this name is new
+  const existing = scores.find(s => s.name === name);
+  if (!existing) {
+    total++;
+    localStorage.setItem(LS_PLAYERS, total);
+    scores.push({ name, score: 0 });
+    saveScores(scores);
+  }
+  updatePlayerStats();
+}
+function saveMyScore() {
+  if (!playerName) return;
+  const scores = getScores();
+  const idx = scores.findIndex(s => s.name === playerName);
+  if (idx >= 0) {
+    scores[idx].score = Math.max(scores[idx].score, score);
+  } else {
+    scores.push({ name: playerName, score });
+  }
+  saveScores(scores);
+  const remember = document.getElementById("remember-me").checked;
+  if (remember) localStorage.setItem(LS_NAME, playerName);
+  updateLeaderboard();
+  updatePlayerStats();
+}
+function updatePlayerStats() {
+  const total = getTotalPlayers();
+  document.getElementById("players-val").textContent = total > 0 ? total : "1";
+
+  if (!playerName) return;
+  const scores = getScores().sort((a, b) => b.score - a.score);
+  const rank = scores.findIndex(s => s.name === playerName) + 1;
+  document.getElementById("rank-val").textContent = rank > 0 ? `#${rank}` : "#1";
+}
+function updateLeaderboard() {
+  const scores = getScores().sort((a, b) => b.score - a.score);
+  const lb = document.getElementById("lb-list");
+  if (scores.length === 0) { lb.innerHTML = "<div style='color:#ccc;font-size:0.9rem'>尚無紀錄</div>"; return; }
+  const top = scores.slice(0, 10);
+  const medals = ["🥇","🥈","🥉"];
+  lb.innerHTML = top.map((s, i) => {
+    const isMe = s.name === playerName;
+    const rankLabel = medals[i] || `${i+1}.`;
+    return `<div class="lb-row${isMe ? " me" : ""}">
+      <span class="lb-rank">${rankLabel}</span>
+      <span class="lb-name">${s.name}${isMe ? " (我)" : ""}</span>
+      <span class="lb-score">${s.score} 分</span>
+    </div>`;
+  }).join("");
+}
+
+// ── Word Queue (no repeat) ────────────────────────────────────────────────────
+function refillQueue() {
+  shuffledQueue = [...VALID_WORDS].sort(() => Math.random() - 0.5);
+}
+function nextWordFromQueue() {
+  if (shuffledQueue.length === 0) refillQueue();
+  return shuffledQueue.pop();
+}
+
+// ── Game Logic ────────────────────────────────────────────────────────────────
 function chooseHiddenIndex(word) {
-  // Hide any index except first and last
   const candidates = [];
   for (let i = 1; i < word.length - 1; i++) candidates.push(i);
-  if (candidates.length === 0) return 1; // fallback for very short
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-function ordinalSuffix(n) {
-  const s = ["th","st","nd","rd"];
-  const v = n % 100;
-  return n + (s[(v-20)%10] || s[v] || s[0]);
-}
-
 function initQuestion() {
-  hintUsed = false;
-  answered = false;
-  usedLetters = {};
-
-  const [word, meaning] = pickWord();
+  hintUsed = false; answered = false;
+  const [word, meaning] = nextWordFromQueue();
   currentWord = word.toLowerCase();
   currentMeaning = meaning;
   hiddenIndex = chooseHiddenIndex(currentWord);
   correctAnswer = currentWord[hiddenIndex];
 
-  // UI
-  document.getElementById("meaning-box").textContent = meaning.charAt(0).toUpperCase() + meaning.slice(1);
+  document.getElementById("meaning-box").textContent =
+    meaning.charAt(0).toUpperCase() + meaning.slice(1);
   renderWordDisplay();
   document.getElementById("position-hint").textContent =
     `第 ${hiddenIndex + 1} 個字母（共 ${currentWord.length} 個字母）`;
@@ -1331,8 +811,8 @@ function initQuestion() {
   document.getElementById("btn-confirm").disabled = false;
   document.getElementById("btn-hint").disabled = false;
   document.getElementById("btn-next").style.display = "none";
-
   renderKeyboard();
+  updateProgress();
 }
 
 function renderWordDisplay() {
@@ -1372,24 +852,21 @@ function renderKeyboard() {
       key.classList.add("kb-key");
       key.id = "kb-" + letter;
       key.textContent = letter.toUpperCase();
-      key.addEventListener("click", () => onKeyClick(letter));
+      key.addEventListener("click", () => {
+        if (answered) return;
+        document.getElementById("letter-input").value = letter.toUpperCase();
+        document.getElementById("letter-input").focus();
+      });
       rowDiv.appendChild(key);
     });
     kb.appendChild(rowDiv);
   });
 }
 
-function onKeyClick(letter) {
-  if (answered) return;
-  const input = document.getElementById("letter-input");
-  input.value = letter.toUpperCase();
-  input.focus();
-}
-
 function markKey(letter, result) {
   const key = document.getElementById("kb-" + letter.toLowerCase());
   if (!key) return;
-  key.classList.remove("kb-correct", "kb-wrong");
+  key.classList.remove("kb-correct","kb-wrong");
   key.classList.add(result === "correct" ? "kb-correct" : "kb-wrong");
 }
 
@@ -1397,59 +874,54 @@ function submitAnswer() {
   if (answered) return;
   const input = document.getElementById("letter-input");
   const guess = input.value.trim().toLowerCase();
-  if (!guess || !/^[a-z]$/.test(guess)) {
-    input.value = "";
-    input.focus();
-    return;
-  }
+  if (!guess || !/^[a-z]$/.test(guess)) { input.value = ""; input.focus(); return; }
 
   if (guess === correctAnswer) {
-    // Correct
     answered = true;
     correctCount++;
     totalCount++;
     if (!hintUsed) score++;
     updateScore();
+    saveMyScore();
 
-    // Reveal letter in box
     const blankBox = document.getElementById("lb-" + hiddenIndex);
     blankBox.classList.remove("blank");
     blankBox.innerHTML = currentWord[hiddenIndex].toUpperCase();
     blankBox.classList.add("correct-anim");
-
     markKey(guess, "correct");
 
     const msg = document.getElementById("result-msg");
-    msg.textContent = hintUsed ? "答對了！（使用提示，不加分）" : "答對了！+1 分";
+    msg.textContent = hintUsed ? `✅ 答對了！完整單字：${currentWord.toUpperCase()}（使用提示，不加分）` : `✅ 答對了！完整單字：${currentWord.toUpperCase()} ＋1分！`;
     msg.className = "result-msg correct";
 
     document.getElementById("btn-confirm").disabled = true;
     document.getElementById("btn-hint").disabled = true;
     document.getElementById("btn-next").style.display = "inline-block";
     document.getElementById("letter-input").disabled = true;
+    updateProgress();
 
+    // Check encouragement (every 10 correct)
+    if (correctCount % 10 === 0) {
+      setTimeout(() => showEncouragement(), 600);
+    }
   } else {
-    // Wrong
     totalCount++;
     updateScore();
-
     markKey(guess, "wrong");
 
-    // Shake the word display
     const display = document.getElementById("word-display");
     display.classList.remove("shake-anim");
-    void display.offsetWidth; // reflow
+    void display.offsetWidth;
     display.classList.add("shake-anim");
 
-    // Flash the blank box red
     const blankBox = document.getElementById("lb-" + hiddenIndex);
     blankBox.classList.remove("wrong-flash");
     void blankBox.offsetWidth;
     blankBox.classList.add("wrong-flash");
-    setTimeout(() => blankBox.classList.remove("wrong-flash"), 400);
+    setTimeout(() => blankBox.classList.remove("wrong-flash"), 420);
 
     const msg = document.getElementById("result-msg");
-    msg.textContent = "答錯了，再試一次！";
+    msg.textContent = `❌ 「${guess.toUpperCase()}」不對，再試試看！`;
     msg.className = "result-msg wrong";
 
     input.value = "";
@@ -1461,51 +933,67 @@ function useHint() {
   if (answered || hintUsed) return;
   hintUsed = true;
   document.getElementById("btn-hint").disabled = true;
-
-  const msg = document.getElementById("result-msg");
-  msg.textContent = `提示：答案是「${correctAnswer.toUpperCase()}」（扣1分）`;
-  msg.className = "result-msg hint";
-
   score = Math.max(0, score - 1);
   updateScore();
-
-  // Pre-fill input
-  const input = document.getElementById("letter-input");
-  input.value = correctAnswer.toUpperCase();
-  input.focus();
+  const msg = document.getElementById("result-msg");
+  msg.textContent = `💡 提示：答案是「${correctAnswer.toUpperCase()}」（扣1分）`;
+  msg.className = "result-msg hint";
+  document.getElementById("letter-input").value = correctAnswer.toUpperCase();
+  document.getElementById("letter-input").focus();
 }
 
-function nextQuestion() {
-  initQuestion();
-}
+function nextQuestion() { initQuestion(); }
 
 function updateScore() {
   document.getElementById("score-val").textContent = score;
   document.getElementById("correct-val").textContent = correctCount;
   document.getElementById("total-val").textContent = totalCount;
+  updatePlayerStats();
 }
 
-// Enter key handler
+function updateProgress() {
+  const progress = correctCount % 10;
+  const pct = (progress / 10) * 100;
+  document.getElementById("progress-bar").style.width = pct + "%";
+  document.getElementById("progress-label").textContent = 10 - progress;
+  document.getElementById("correct-count-label").textContent = `已答對 ${correctCount} 題`;
+}
+
+// ── Encouragement Popup ───────────────────────────────────────────────────────
+function showEncouragement() {
+  const data = ENC_MESSAGES[encIndex % ENC_MESSAGES.length];
+  encIndex++;
+  document.getElementById("enc-emoji").textContent = data.emoji;
+  document.getElementById("enc-msg").textContent = data.msg;
+  document.getElementById("enc-sub").textContent = `${playerName ? playerName + "，" : ""}${data.sub}`;
+  document.getElementById("encourage-overlay").classList.add("show");
+}
+function closeEncouragement() {
+  document.getElementById("encourage-overlay").classList.remove("show");
+  document.getElementById("letter-input").focus();
+}
+
+// ── Keyboard Events ───────────────────────────────────────────────────────────
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    if (!answered) {
-      submitAnswer();
-    } else {
-      nextQuestion();
+    if (document.getElementById("encourage-overlay").classList.contains("show")) {
+      closeEncouragement(); return;
     }
+    if (!answered) submitAnswer();
+    else nextQuestion();
   }
 });
-
-// Redirect keyboard typing to input
 document.addEventListener("keydown", (e) => {
   if (answered) return;
   const input = document.getElementById("letter-input");
-  if (document.activeElement !== input && /^[a-zA-Z]$/.test(e.key)) {
-    input.focus();
-  }
+  if (document.activeElement !== input && /^[a-zA-Z]$/.test(e.key)) input.focus();
 });
 
-// Start
+// ── Start ─────────────────────────────────────────────────────────────────────
+refillQueue();
+initPlayer();
+updateLeaderboard();
+updatePlayerStats();
 initQuestion();
 </script>
 </body>
