@@ -8,11 +8,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background-color: #2a1a0e;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Klimt_-_Bildnis_Elisabeth_Lederer.jpg/800px-Klimt_-_Bildnis_Elisabeth_Lederer.jpg');
-  background-size: cover;
-  background-position: center top;
-  background-attachment: fixed;
+  background-color: #ffffff;
   color: #3d2c1e;
   font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
   min-height: 100vh;
@@ -25,16 +21,6 @@ body {
   overflow-x: hidden;
 }
 
-/* dark overlay so cards remain readable */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background: rgba(20, 10, 4, 0.45);
-  z-index: 0;
-  pointer-events: none;
-}
-
 /* ── Header ── */
 .header {
   position: relative;
@@ -45,16 +31,15 @@ body::before {
 .header h1 {
   font-size: 2rem;
   font-weight: 900;
-  color: #fff8e7;
+  color: #c0392b;
   letter-spacing: 3px;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(180,100,20,0.6);
+  text-shadow: 2px 2px 0 #f5b7b1;
 }
 .header .subtitle {
   font-size: 0.88rem;
-  color: #f5ddb0;
+  color: #999;
   margin-top: 4px;
   letter-spacing: 1px;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
 }
 
 /* ── Player Panel ── */
@@ -493,11 +478,10 @@ body::before {
 footer {
   margin-top: 20px;
   font-size: 0.8rem;
-  color: #f5ddb0;
+  color: #bbb;
   letter-spacing: 1px;
   text-align: center;
   position: relative; z-index: 1;
-  text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 </style>
 </head>
