@@ -8,7 +8,11 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #fff8f0;
+  background-color: #2a1a0e;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Klimt_-_Bildnis_Elisabeth_Lederer.jpg/800px-Klimt_-_Bildnis_Elisabeth_Lederer.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   color: #3d2c1e;
   font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
   min-height: 100vh;
@@ -21,31 +25,14 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Decorative Flowers ── */
-.flowers-left, .flowers-right {
+/* dark overlay so cards remain readable */
+body::before {
+  content: '';
   position: fixed;
-  top: 0; bottom: 0;
-  width: 160px;
-  pointer-events: none;
+  inset: 0;
+  background: rgba(20, 10, 4, 0.45);
   z-index: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  align-items: center;
-  padding: 20px 0;
-}
-.flowers-left { left: 0; }
-.flowers-right { right: 0; }
-
-.flower { font-size: 2.4rem; animation: sway 4s ease-in-out infinite; }
-.flower:nth-child(2) { animation-delay: 0.8s; font-size: 2rem; }
-.flower:nth-child(3) { animation-delay: 1.6s; font-size: 2.8rem; }
-.flower:nth-child(4) { animation-delay: 2.4s; font-size: 1.8rem; }
-.flower:nth-child(5) { animation-delay: 3.2s; font-size: 2.2rem; }
-
-@keyframes sway {
-  0%,100% { transform: rotate(-6deg) translateY(0); }
-  50% { transform: rotate(6deg) translateY(-8px); }
+  pointer-events: none;
 }
 
 /* ── Header ── */
@@ -58,15 +45,16 @@ body {
 .header h1 {
   font-size: 2rem;
   font-weight: 900;
-  color: #c0392b;
+  color: #fff8e7;
   letter-spacing: 3px;
-  text-shadow: 2px 2px 0 #f5b7b1;
+  text-shadow: 2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(180,100,20,0.6);
 }
 .header .subtitle {
   font-size: 0.88rem;
-  color: #999;
+  color: #f5ddb0;
   margin-top: 4px;
   letter-spacing: 1px;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
 }
 
 /* ── Player Panel ── */
@@ -193,15 +181,20 @@ body {
 .meaning-box {
   background: #fff8f0;
   border-left: 4px solid #e67e22;
-  border-radius: 0 10px 10px 0;
-  padding: 12px 18px;
-  font-size: 1rem;
-  color: #7d4e1e;
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #5a2d0c;
   width: 100%;
-  min-height: 44px;
+  min-height: 52px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   font-style: italic;
+  letter-spacing: 0.3px;
+  line-height: 1.5;
 }
 
 /* ── Word Display ── */
@@ -500,32 +493,15 @@ body {
 footer {
   margin-top: 20px;
   font-size: 0.8rem;
-  color: #ccc;
+  color: #f5ddb0;
   letter-spacing: 1px;
   text-align: center;
   position: relative; z-index: 1;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
 }
 </style>
 </head>
 <body>
-
-<!-- Decorative Flowers Left -->
-<div class="flowers-left">
-  <div class="flower">🌸</div>
-  <div class="flower">🌺</div>
-  <div class="flower">🌼</div>
-  <div class="flower">🌷</div>
-  <div class="flower">🌻</div>
-</div>
-
-<!-- Decorative Flowers Right -->
-<div class="flowers-right">
-  <div class="flower">🌹</div>
-  <div class="flower">🌸</div>
-  <div class="flower">🌺</div>
-  <div class="flower">🌼</div>
-  <div class="flower">🌷</div>
-</div>
 
 <!-- Header -->
 <div class="header">
